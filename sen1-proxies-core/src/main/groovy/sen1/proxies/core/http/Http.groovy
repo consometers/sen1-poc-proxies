@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpRequestBase
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.entity.ByteArrayEntity
 import org.apache.http.entity.ContentType
+import org.apache.http.entity.StringEntity
 import org.apache.http.entity.mime.FormBodyPartBuilder
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.impl.client.CloseableHttpClient
@@ -137,6 +138,20 @@ class Http {
 	 */
 	Http bodyByteArray(byte[] buffer) {
 		httpRequest.setEntity(new ByteArrayEntity(buffer))
+		return this
+	}
+
+
+	/**
+	 * Body depuis un String.
+	 * Attention cette méthode ne peut pas êre appelée en plus de formField ou multipart..
+	 *
+	 * @param name
+	 * @param value
+	 * @return
+	 */
+	Http bodyString(String buffer) {
+		httpRequest.setEntity(new StringEntity(buffer))
 		return this
 	}
 

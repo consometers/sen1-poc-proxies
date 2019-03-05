@@ -16,6 +16,7 @@ import sen1.proxies.core.http.transformer.StringResponseTransformer
  * Implémentation thead-safe : un même objet peut être utilisé plusieurs fois pour exécuter différents appels
  * à l'API
  * 
+ * @see https://www.warp10.io/doc/reference
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
@@ -108,7 +109,20 @@ class Warp10 {
 
 	/**
 	 * Exécution d'un appel fetch pour retrouver les données au format "text"
+	 * 
+	 * The text format uses a less verbose version of the GTS Input Format as output format.
+	 * In this format the data for each GTS is grouped and classname and labels are only written in the first line
+	 * of each group.
 	 *
+	 * Documentation :
+	 * The Fetch API allows to recover raw GTS data in a extremely quick and efficient way.
+	 * The Fetch API must be accessed using the GET method.
+	 * The HTTP endpoint used by the Fetch API is https://HOST:PORT/api/vX/fetch, where HOST:PORT is a valid endpoint
+	 * for the Warp 10™ instance and vX is the version of the API you want to use (currently v0).
+	 * Note that the amount of data that can be retrieved via the /fetch endpoint is not limited in any way.
+	 * You can use this endpoint to dump all the data accessible with a given token. The time needed for data retrieval
+	 * is dependent on the size of the retrieved dataset.
+	 * 
 	 * @param fetchParam
 	 * @return
 	 * @throws Exception
@@ -121,6 +135,17 @@ class Warp10 {
 	/**
 	 * Exécution d'un appel fetch pour retrouver les données au format "fulltext"
 	 * 
+	 * The fulltext format uses the GTS Input Format as output format.
+	 * 
+	 * Documentation :
+	 * The Fetch API allows to recover raw GTS data in a extremely quick and efficient way.
+	 * The Fetch API must be accessed using the GET method.
+	 * The HTTP endpoint used by the Fetch API is https://HOST:PORT/api/vX/fetch, where HOST:PORT is a valid endpoint
+	 * for the Warp 10™ instance and vX is the version of the API you want to use (currently v0).
+	 * Note that the amount of data that can be retrieved via the /fetch endpoint is not limited in any way.
+	 * You can use this endpoint to dump all the data accessible with a given token. The time needed for data retrieval
+	 * is dependent on the size of the retrieved dataset.
+	 * 
 	 * @param fetchParam
 	 * @return
 	 * @throws Exception
@@ -131,7 +156,16 @@ class Warp10 {
 
 
 	/**
-	 * Exécution d'un appel fetch pour retrouver les données au format "json"
+	 * Exécution d'un appel "fetch" pour retrouver les données au format "json"
+	 * 
+	 * Documentation :
+	 * The Fetch API allows to recover raw GTS data in a extremely quick and efficient way.
+	 * The Fetch API must be accessed using the GET method.
+	 * The HTTP endpoint used by the Fetch API is https://HOST:PORT/api/vX/fetch, where HOST:PORT is a valid endpoint
+	 * for the Warp 10™ instance and vX is the version of the API you want to use (currently v0).
+	 * Note that the amount of data that can be retrieved via the /fetch endpoint is not limited in any way.
+	 * You can use this endpoint to dump all the data accessible with a given token. The time needed for data retrieval
+	 * is dependent on the size of the retrieved dataset.
 	 * 
 	 * @param fetchParam
 	 * @return
@@ -144,6 +178,7 @@ class Warp10 {
 
 	/**
 	 * Méthode interne pour faire les appels fetch
+	 * Le type retourné dépend du paramètre format
 	 * 
 	 * @param fetchParam
 	 * @param format
@@ -152,7 +187,7 @@ class Warp10 {
 	 */
 	private Object fetch(Warp10Fetch fetchParam, Warp10FormatEnum format) throws Exception {
 		assert fetchParam != null
-		fetchParam.assertFetch()
+		fetchParam.assertParam()
 
 		Http http = Http.Get("${protocol}://${server}:${port}/api/v${version}/fetch")
 				.header("X-Warp10-Token", token)
@@ -186,5 +221,30 @@ class Warp10 {
 				new StringResponseTransformer())
 
 		return http.execute(transformer)?.content
+	}
+
+
+	/**
+	 * Exécution d'un appel "exec" pour exécuter un WarpScript et retourner du contenu JSON
+	 *
+	 * Documentation :
+	 * The WarpScript™ data manipulation language can be used using a Warp 10™ API. This API is served by the egress
+	 * component, also referred to as the Warp 10™ Analytics Engine.
+	 * The WarpScript™ API must be accessed using the POST method.
+	 * The HTTP endpoint used by the WarpScript™ API is https://HOST:PORT/api/vX/exec, where HOST:PORT is a valid
+	 * endpoint for the public Warp 10™ API and vX is the version of the API you want to use (currently v0).
+	 *
+	 * @param execParam
+	 * @return
+	 * @throws Exception
+	 */
+	JSONElement exec(Warp10Exec execParam) throws Exception {
+		assert execParam != null
+		execParam.assertParam()
+
+		Http http = Http.Post("${protocol}://${server}:${port}/api/v${version}/exec")
+				.bodyString(execParam.body())
+
+		return http.execute(new JsonResponseTransformer())?.content
 	}
 }

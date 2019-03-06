@@ -1,11 +1,17 @@
 package sen1.proxies.pride.warp10
 
 import org.grails.testing.GrailsUnitTest
+import org.grails.web.json.JSONElement
 
+import sen1.proxies.pride.warp10.script.Warp10FetchScript
+import sen1.proxies.pride.warp10.script.Warp10Script
 import spock.lang.Shared
 import spock.lang.Specification
 
 class Warp10Spec extends Specification implements GrailsUnitTest {
+
+	private static final String TOKEN = "JrwmTJHEYRs4CfQ81_ftw_hKKfhzPl8SSb5t_LFOYYrLfjd8UnPoJM0l9teHvuGN8JkCzy5LgicYb.uxHCpBwzrX15xfTkeX6hgTpujwLfwZbUzZwzaxeaXibW3_xVIiP_twQIp6tIaJDiirhjEKPL3DNv0FRtRp"
+	private static final String PRM = "30001450710424"
 
 	@Shared
 	Warp10 warp10Read
@@ -17,33 +23,57 @@ class Warp10Spec extends Specification implements GrailsUnitTest {
 	 * @return
 	 */
 	def setupSpec() {
-		warp10Read = Warp10.build("161.106.242.27", "JrwmTJHEYRs4CfQ81_ftw_hKKfhzPl8SSb5t_LFOYYrLfjd8UnPoJM0l9teHvuGN8JkCzy5LgicYb.uxHCpBwzrX15xfTkeX6hgTpujwLfwZbUzZwzaxeaXibW3_xVIiP_twQIp6tIaJDiirhjEKPL3DNv0FRtRp")
-				.protocol("http").port(8080)
+		warp10Read = new Warp10()
+				.server("161.106.242.27")
+				.protocol("http")
+				.port(8080)
 	}
 
 
-	/**
-	 * Test la levée d'une error de type Assertion car l'objet fetch n'est pas complet
-	 */
-	void "Not valid fetch params throw AssertionError"() {
-		when:
+	void "API FETCH : invalid params throw AssertionError"() {
+		when:"Invalid params"
 		warp10Read.fetchText(new Warp10Fetch())
 
-		then:
+		then:"Throw AssertionError"
 		thrown AssertionError
 	}
 
 
-	/**
-	 * Test la bonne exécution d'un fetch sur le PRM 30001450710424
-	 */
-	void "Fetch PRM 30001450710424 not throw Exception"() {
-		when:
-		def result = warp10Read.fetchText(new Warp10Fetch(selector: "=pride.enedis.cdc{PRM=30001450710424}",
-		start: new Date(), stop: new Date()))
+	void "API FETCH : valid params get text response"() {
+		when:"Valid params"
+		// récupère les 10 dernières valeurs
+		def result = warp10Read.fetchText(new Warp10Fetch()
+				.token(TOKEN)
+				.selector("=pride.enedis.cdc{PRM=${PRM}}")
+				.now(new Date())
+				.timespan("-10"))
 
-		then:
+		then:"Get text response"
 		notThrown Exception
-		result != null
+		result instanceof String
+	}
+
+
+	void "API EXEC : invalid params throw AssertionError"() {
+		when:"Invalid params"
+		warp10Read.exec(new Warp10FetchScript())
+
+		then:"Throw AssertionError"
+		thrown AssertionError
+	}
+
+
+	void "API EXEC : valid params get json response"() {
+		when:"Valid params"
+		// récupère les 10 dernières valeurs
+		def result = warp10Read.exec(new Warp10FetchScript()
+				.token(TOKEN)
+				.selector("=pride.enedis.cdc{PRM=${PRM}}")
+				.end(new Date())
+				.count(10))
+
+		then:"Get json response"
+		notThrown Exception
+		result instanceof JSONElement
 	}
 }

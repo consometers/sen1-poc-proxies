@@ -1,5 +1,8 @@
 package sen1.proxies.pride.warp10
 
+import groovy.transform.builder.Builder
+import groovy.transform.builder.SimpleStrategy
+
 /**
  * Paramètres HTTP pour un appel fetch
  * 
@@ -7,7 +10,13 @@ package sen1.proxies.pride.warp10
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
+@Builder(builderStrategy=SimpleStrategy, prefix="")
 class Warp10Fetch {
+	/**
+	 * To be authenticated you need to add a X-Warp10-Token header with a valid READ token.
+	 */
+	String token
+
 	/**
 	 * the selector is a string that allows to select one or several GTS. Its composed of the concatenation of a
 	 * classname selector and a labels selector. 
@@ -52,7 +61,7 @@ class Warp10Fetch {
 	 * You can use now as the value of the now parameter to dynamically retrieve the current time.The timespan parameter
 	 * can be specified as an ISO-8601 duration. Note that supported durations cannot contain years or months.
 	 */
-	long now
+	Date now
 	String timespan
 
 	/**
@@ -84,7 +93,8 @@ class Warp10Fetch {
 	 * 
 	 * @throws AssertionError
 	 */
-	void assertParam() {
+	void asserts() {
+		assert token != null
 		assert selector != null
 		// soit mode debut/fin, soit repère/duration
 		assert (start && stop) || (now && timespan)

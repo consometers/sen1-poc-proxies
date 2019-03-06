@@ -2,11 +2,14 @@ package sen1.proxies.pride.warp10
 
 import org.grails.web.json.JSONElement
 
+import groovy.transform.builder.Builder
+import groovy.transform.builder.SimpleStrategy
 import sen1.proxies.core.DateUtils
 import sen1.proxies.core.http.Http
 import sen1.proxies.core.http.transformer.JsonResponseTransformer
 import sen1.proxies.core.http.transformer.ResponseTransformer
 import sen1.proxies.core.http.transformer.StringResponseTransformer
+import sen1.proxies.pride.warp10.script.Warp10Script
 
 
 /**
@@ -20,90 +23,36 @@ import sen1.proxies.core.http.transformer.StringResponseTransformer
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
+@Builder(builderStrategy=SimpleStrategy, prefix="")
 class Warp10 {
-	/**
-	 * Authentification sur le serveur
-	 */
-	private String token
-
 	/**
 	 * API version
 	 */
-	private String version = "0"
+	String apiVersion = "0"
 
 	/**
 	 * Protocole pour la requête HTTP
 	 * 
 	 */
-	private String protocol = "https"
+	String protocol = "https"
 
 	/**
 	 * Infos de connexion au serveur Warp10
 	 * Comme le protocole est par défaut https, le port aussi
 	 */
-	private String server
-	private int port = 443
+	String server
+	int port = 443
 
-
-	/**
-	 * contructor privé pour forcer l'utilisation du builder
-	 * 
-	 * @param token
-	 * @param server
-	 * @param port
-	 */
-	private Warp10(String server, String token) {
-		this.token = token
-		this.server = server
-	}
 
 
 	/**
-	 * Point d'entrée pour créer une instance Warp10
-	 * 
-	 * @param token
-	 * @return
+	 * Vérifie les paramètres avant exécution d'un appel à l'API
 	 */
-	static Warp10 build(String server, String token) {
-		assert token != null : "token is required !"
-		assert server != null : "server is required !"
-		return new Warp10(server, token)
-	}
-
-
-	/**
-	 * Change la version de l'API
-	 * 
-	 * @param version
-	 * @return
-	 */
-	Warp10 version(String version) {
-		this.version = version
-		return this
-	}
-
-
-	/**
-	 * Change le protocole
-	 *
-	 * @param protocol
-	 * @return
-	 */
-	Warp10 protocol(String protocol) {
-		this.protocol = protocol
-		return this
-	}
-
-
-	/**
-	 * Change le port
-	 *
-	 * @param port
-	 * @return
-	 */
-	Warp10 port(int port) {
-		this.port = port
-		return this
+	void asserts() {
+		assert server != null
+		assert protocol != null
+		assert apiVersion != null
+		assert port > 0
 	}
 
 
@@ -186,11 +135,12 @@ class Warp10 {
 	 * @throws Exception
 	 */
 	private Object fetch(Warp10Fetch fetchParam, Warp10FormatEnum format) throws Exception {
+		this.asserts()
 		assert fetchParam != null
-		fetchParam.assertParam()
+		fetchParam.asserts()
 
-		Http http = Http.Get("${protocol}://${server}:${port}/api/v${version}/fetch")
-				.header("X-Warp10-Token", token)
+		Http http = Http.Get("${protocol}://${server}:${port}/api/v${apiVersion}/fetch")
+				.header("X-Warp10-Token", fetchParam.token)
 				.queryParam("selector", fetchParam.selector)
 				.queryParam("format", format.toString())
 
@@ -213,7 +163,7 @@ class Warp10 {
 			http.queryParam("start", DateUtils.formatDateTimeIso(fetchParam.start))
 					.queryParam("stop", DateUtils.formatDateTimeIso(fetchParam.stop))
 		} else if (fetchParam.now && fetchParam.timespan) {
-			http.queryParam("now", "${fetchParam.now}")
+			http.queryParam("now", "${fetchParam.now.time * 1000}")
 					.queryParam("timespan", fetchParam.timespan)
 		}
 
@@ -234,16 +184,17 @@ class Warp10 {
 	 * The HTTP endpoint used by the WarpScript™ API is https://HOST:PORT/api/vX/exec, where HOST:PORT is a valid
 	 * endpoint for the public Warp 10™ API and vX is the version of the API you want to use (currently v0).
 	 *
-	 * @param execParam
+	 * @param warpScript
 	 * @return
 	 * @throws Exception
 	 */
-	JSONElement exec(Warp10Exec execParam) throws Exception {
-		assert execParam != null
-		execParam.assertParam()
+	JSONElement exec(Warp10Script warpScript) throws Exception {
+		this.asserts()
+		assert warpScript != null
+		warpScript.asserts()
 
-		Http http = Http.Post("${protocol}://${server}:${port}/api/v${version}/exec")
-				.bodyString(execParam.body())
+		Http http = Http.Post("${protocol}://${server}:${port}/api/v${apiVersion}/exec")
+				.bodyString(warpScript.script())
 
 		return http.execute(new JsonResponseTransformer())?.content
 	}

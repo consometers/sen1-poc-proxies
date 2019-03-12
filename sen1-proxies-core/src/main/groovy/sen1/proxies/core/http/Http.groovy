@@ -32,7 +32,7 @@ import sen1.proxies.core.http.transformer.ResponseTransformer
  *
  */
 class Http {
-	static final Logger log = LoggerFactory.getLogger(Http.class);
+	static final Logger log = LoggerFactory.getLogger(Http)
 
 	URIBuilder uriBuilder
 	HttpRequestBase httpRequest

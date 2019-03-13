@@ -1,5 +1,6 @@
 package sen1.proxies.pride.warp10
 
+import org.grails.web.json.JSONArray
 import org.grails.web.json.JSONElement
 
 import groovy.transform.builder.Builder
@@ -197,5 +198,54 @@ class Warp10 {
 				.bodyString(warpScript.script())
 
 		return http.execute(new JsonResponseTransformer())?.content
+	}
+
+
+	/**
+	 * Parse le contenu d'une réponse Warp10 et renvoit les datapoints de la série correspondant à l'index demandé
+	 * 
+	 * @param warp10Result
+	 * @param index
+	 * @return liste datapoints
+	 * @throws Exception
+	 */
+	List<JSONArray> parseDatapoints(JSONElement warp10Result, int index) throws Exception {
+		if (! (warp10Result instanceof JSONArray)) {
+			throw new Exception("Warp10 result must be an array/list !")
+		}
+
+		JSONArray array = warp10Result as JSONArray
+		assert index < array.size()
+
+		return array[index].v
+	}
+
+
+	/**
+	 * Parse un datapoint au format json et retourne sa valeur
+	 * 
+	 * @param jsonValue
+	 * @return
+	 * @throws Exception
+	 */
+	String parseDatapointValue(JSONArray jsonValue) throws Exception {
+		assert jsonValue != null
+		assert jsonValue.size() == 2
+		return jsonValue[1]?.toString()
+	}
+
+
+	/**
+	 * Parse un datapoint au format json et retourne sa date
+	 *
+	 * @param jsonValue
+	 * @return
+	 * @throws Exception
+	 */
+	Date parseDatapointTimestamp(JSONArray jsonValue) throws Exception {
+		assert jsonValue != null
+		assert jsonValue.size() == 2
+		assert jsonValue[0] != null
+		return new Date(jsonValue[0] as Long)
 	}
 }

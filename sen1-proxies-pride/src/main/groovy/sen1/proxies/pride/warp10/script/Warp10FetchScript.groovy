@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 
 import groovy.transform.builder.Builder
 import groovy.transform.builder.SimpleStrategy
+import sen1.proxies.pride.warp10.Warp10Script
 
 /**
  * Création d'un script pour la fonction "fetch"

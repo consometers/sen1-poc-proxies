@@ -81,3 +81,22 @@ grails:
 endpoints:
     jmx:
         unique-names: true
+
+---
+environments:
+    test:
+        dataSource:
+            logSql: true
+            formatSql: true
+            pooled: true
+            driverClassName: org.h2.Driver
+            dbCreate: create-drop
+            url: jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+
+---
+sen1:
+    proxies:
+        core:
+            pagination:
+                maxView: 25
+                maxBackend: 100 

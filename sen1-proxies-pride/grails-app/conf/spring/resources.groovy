@@ -2,13 +2,13 @@ package spring
 
 import sen1.proxies.core.scheduler.DefaultScheduler
 import sen1.proxies.pride.warp10.Warp10
+import sen1.proxies.pride.warp10.impl.Warp10v0
 
 // Place your Spring DSL code here
 beans = {
 
-
 	// instance warp10 préconfigurée
-	warp10(Warp10) {
+	warp10(Warp10v0) {
 		server = grailsApplication.config.sen1.proxies.pride.warp10.host
 		port = grailsApplication.config.sen1.proxies.pride.warp10.port
 		protocol = grailsApplication.config.sen1.proxies.pride.warp10.protocol

@@ -164,3 +164,4 @@ sen1:
                 host: 161.106.242.27
                 port: 8080
                 protocol: http
+                firstMaxValue: 500

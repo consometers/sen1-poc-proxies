@@ -5,13 +5,6 @@ import org.grails.web.json.JSONElement
 
 import groovy.transform.builder.Builder
 import groovy.transform.builder.SimpleStrategy
-import sen1.proxies.core.DateUtils
-import sen1.proxies.core.http.Http
-import sen1.proxies.core.http.transformer.JsonResponseTransformer
-import sen1.proxies.core.http.transformer.ResponseTransformer
-import sen1.proxies.core.http.transformer.StringResponseTransformer
-import sen1.proxies.pride.warp10.script.Warp10Script
-
 
 /**
  * Classe de manipulation de l'API Warp10 https://www.warp10.io/
@@ -21,29 +14,28 @@ import sen1.proxies.pride.warp10.script.Warp10Script
  * à l'API
  * 
  * @see https://www.warp10.io/doc/reference
+ * 
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-@Builder(builderStrategy=SimpleStrategy, prefix="")
-class Warp10 {
+trait Warp10 {
 	/**
 	 * API version
 	 */
-	String apiVersion = "0"
+	String apiVersion
 
 	/**
 	 * Protocole pour la requête HTTP
-	 * 
+	 *
 	 */
-	String protocol = "https"
+	String protocol
 
 	/**
 	 * Infos de connexion au serveur Warp10
 	 * Comme le protocole est par défaut https, le port aussi
 	 */
 	String server
-	int port = 443
-
+	int port
 
 
 	/**
@@ -55,7 +47,6 @@ class Warp10 {
 		assert apiVersion != null
 		assert port > 0
 	}
-
 
 	/**
 	 * Exécution d'un appel fetch pour retrouver les données au format "text"
@@ -77,10 +68,7 @@ class Warp10 {
 	 * @return
 	 * @throws Exception
 	 */
-	String fetchText(Warp10Fetch fetchParam) throws Exception {
-		return this.fetch(fetchParam, Warp10FormatEnum.text)
-	}
-
+	abstract String fetchText(Warp10Fetch fetchParam) throws Exception
 
 	/**
 	 * Exécution d'un appel fetch pour retrouver les données au format "fulltext"
@@ -100,10 +88,7 @@ class Warp10 {
 	 * @return
 	 * @throws Exception
 	 */
-	String fetchFulltext(Warp10Fetch fetchParam) throws Exception {
-		return this.fetch(fetchParam, Warp10FormatEnum.fulltext)
-	}
-
+	abstract String fetchFulltext(Warp10Fetch fetchParam) throws Exception
 
 	/**
 	 * Exécution d'un appel "fetch" pour retrouver les données au format "json"
@@ -121,59 +106,7 @@ class Warp10 {
 	 * @return
 	 * @throws Exception
 	 */
-	JSONElement fetchJson(Warp10Fetch fetchParam) throws Exception {
-		return this.fetch(fetchParam, Warp10FormatEnum.json)
-	}
-
-
-	/**
-	 * Méthode interne pour faire les appels fetch
-	 * Le type retourné dépend du paramètre format
-	 * 
-	 * @param fetchParam
-	 * @param format
-	 * @return
-	 * @throws Exception
-	 */
-	private Object fetch(Warp10Fetch fetchParam, Warp10FormatEnum format) throws Exception {
-		this.asserts()
-		assert fetchParam != null
-		fetchParam.asserts()
-
-		Http http = Http.Get("${protocol}://${server}:${port}/api/v${apiVersion}/fetch")
-				.header("X-Warp10-Token", fetchParam.token)
-				.queryParam("selector", fetchParam.selector)
-				.queryParam("format", format.toString())
-
-		// gère les paramètres optionnels
-		if (fetchParam.dedup) {
-			http.queryParam("dedup", "true")
-		}
-		if (fetchParam.showattr) {
-			http.queryParam("showattr", "true")
-		}
-		if (fetchParam.showmeta) {
-			http.queryParam("showmeta", "true")
-		}
-		if (fetchParam.showerrors) {
-			http.queryParam("showerrors", "true")
-		}
-
-		// les paramètres pour sélectionner la période des données : 2 modes possibles
-		if (fetchParam.start && fetchParam.stop) {
-			http.queryParam("start", DateUtils.formatDateTimeIso(fetchParam.start))
-					.queryParam("stop", DateUtils.formatDateTimeIso(fetchParam.stop))
-		} else if (fetchParam.now && fetchParam.timespan) {
-			http.queryParam("now", "${fetchParam.now.time * 1000}")
-					.queryParam("timespan", fetchParam.timespan)
-		}
-
-		ResponseTransformer transformer = (format == Warp10FormatEnum.json ? new JsonResponseTransformer() :
-				new StringResponseTransformer())
-
-		return http.execute(transformer)?.content
-	}
-
+	abstract JSONElement fetchJson(Warp10Fetch fetchParam) throws Exception
 
 	/**
 	 * Exécution d'un appel "exec" pour exécuter un WarpScript et retourner du contenu JSON
@@ -189,17 +122,7 @@ class Warp10 {
 	 * @return
 	 * @throws Exception
 	 */
-	JSONElement exec(Warp10Script warpScript) throws Exception {
-		this.asserts()
-		assert warpScript != null
-		warpScript.asserts()
-
-		Http http = Http.Post("${protocol}://${server}:${port}/api/v${apiVersion}/exec")
-				.bodyString(warpScript.script())
-
-		return http.execute(new JsonResponseTransformer())?.content
-	}
-
+	abstract JSONElement exec(Warp10Script warpScript) throws Exception
 
 	/**
 	 * Parse le contenu d'une réponse Warp10 et renvoit les datapoints de la série correspondant à l'index demandé
@@ -209,17 +132,7 @@ class Warp10 {
 	 * @return liste datapoints
 	 * @throws Exception
 	 */
-	List<JSONArray> parseDatapoints(JSONElement warp10Result, int index) throws Exception {
-		if (! (warp10Result instanceof JSONArray)) {
-			throw new Exception("Warp10 result must be an array/list !")
-		}
-
-		JSONArray array = warp10Result as JSONArray
-		assert index < array.size()
-
-		return array[index].v
-	}
-
+	abstract List<JSONArray> datapoints(JSONElement warp10Result, int index) throws Exception
 
 	/**
 	 * Parse un datapoint au format json et retourne sa valeur
@@ -228,12 +141,7 @@ class Warp10 {
 	 * @return
 	 * @throws Exception
 	 */
-	String parseDatapointValue(JSONArray jsonValue) throws Exception {
-		assert jsonValue != null
-		assert jsonValue.size() == 2
-		return jsonValue[1]?.toString()
-	}
-
+	abstract String datapointValue(JSONArray jsonValue) throws Exception
 
 	/**
 	 * Parse un datapoint au format json et retourne sa date
@@ -242,10 +150,5 @@ class Warp10 {
 	 * @return
 	 * @throws Exception
 	 */
-	Date parseDatapointTimestamp(JSONArray jsonValue) throws Exception {
-		assert jsonValue != null
-		assert jsonValue.size() == 2
-		assert jsonValue[0] != null
-		return new Date(jsonValue[0] as Long)
-	}
+	abstract Date datapointTimestamp(JSONArray jsonValue) throws Exception
 }

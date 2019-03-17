@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 
 import grails.gorm.transactions.Transactional
+import sen1.proxies.core.OutboxConsumer
 import sen1.proxies.core.service.AbstractService
+import sen1.proxies.core.service.PushOutboxService
 import sen1.proxies.pride.warp10.Warp10
 import sen1.proxies.pride.warp10.script.Warp10FetchScript
 
@@ -16,7 +18,7 @@ import sen1.proxies.pride.warp10.script.Warp10FetchScript
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-class PrideService extends AbstractService {
+class PrideService extends AbstractService implements PushOutboxService {
 
 	/**
 	 * Instance Warp10 injectée par Spring
@@ -32,38 +34,40 @@ class PrideService extends AbstractService {
 	@Value('${sen1.proxies.pride.warp10.readToken}')
 	String readToken
 
-
 	/**
-	 * Charge les données récentes d'une metric depuis le système Pride et les passe à un consommateur
-	 * Si la metric n'a pas encore été chargée au moins une fois (dateLastValue = null), alors on va seulement démarrer
-	 * le transfert des données depuis le jour même (on ne remonte pas en arrière).
-	 * 
-	 * @param metric
-	 * @param consume
-	 * @throws Exception
+	 * Injecté depuis les properties
+	 * @see application.yml
 	 */
-	void consumeValues(Metric metric, Closure consume) throws Exception {
-		// date début transfert, soit le début du jour si jamais utilisé, soit la date de la dernière valeur
-		Date dateStart = metric.dateLastValue ?: new Date().clearTime()
-		Date dateEnd = new Date()
+	@Value('${sen1.proxies.pride.warp10.firstMaxValue}')
+	int firstMaxValue
 
-		// charge les infos depuis pride avec warp10
-		// utilisation du script fetch pour un retour des valeurs en json
-		JSONElement resultScript = warp10.exec(new Warp10FetchScript()
+
+	/** 
+	 * Charge les données récentes depuis le système Pride
+	 * Si data n'a pas encore été chargée au moins une fois (dateLastValue = null), alors on va essayer de remonter
+	 * les MAX dernières valeurs
+	 *
+	 * @see sen1.proxies.core.service.PushOutboxService#fetchData(sen1.proxies.core.OutboxConsumer)
+	 */
+	@Override
+	List fetchData(OutboxConsumer outboxConsumer) throws Exception {
+		Warp10FetchScript fetchScript = new Warp10FetchScript()
 				.token(readToken)
-				.selector("=${metric.classname}{${metric.labelname}=${metric.labelvalue}}")
-				.start(dateStart)
-				.end(dateEnd))
+				.selector("=${outboxConsumer.name}{${outboxConsumer.metaname}=${outboxConsumer.metavalue}}")
+
+		// soit cette donnée a déjà été lue, et on ne charge que les données plus récentes au dernier chargement
+		if (outboxConsumer.dateLastValue) {
+			fetchScript.start(outboxConsumer.dateLastValue).end(new Date())
+		} else {
+			// sinon on essaye de lire les MAX dernières valeurs
+			fetchScript.end(new Date()).count(firstMaxValue)
+		}
+
+		// appel API Warp10 via script
+		JSONElement warp10Result = warp10.exec(fetchScript)
 
 		// parse le contenu de la réponse Warp10 pour récupérer les valeurs
 		// le selector demandé est unique, donc on prend la 1ère série du json retourné
-		List<JSONArray> datapoints = warp10.parseDatapoints(resultScript, 0)
-
-		// passe ensuite chaque valeur dans la fonction de traitement avec 2 paramètres :
-		// la metric et sa valeur convertie
-		datapoints?.each { datapoint ->
-			consume(metric, new MetricValue(date: warp10.parseDatapointTimestamp(datapoint),
-			value: warp10.parseDatapointValue(datapoint)))
-		}
+		return warp10.datapoints(warp10Result, 0)
 	}
 }

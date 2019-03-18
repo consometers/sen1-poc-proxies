@@ -13,7 +13,7 @@ package sen1.proxies.core.io
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-interface InboxConverter<T, U extends MessageData> {
+interface InboxConverter<T> {
 	/**
 	 * Lecture d'une donnée reçue du réseau fédéré et conversion en donnée du système local
 	 * 
@@ -21,5 +21,5 @@ interface InboxConverter<T, U extends MessageData> {
 	 * @return <T>
 	 * @throws Exception
 	 */
-	T convert(Message<U> message) throws Exception
+	T convert(Message message) throws Exception
 }

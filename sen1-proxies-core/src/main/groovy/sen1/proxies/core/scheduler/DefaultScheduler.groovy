@@ -37,15 +37,14 @@ import static org.quartz.SimpleScheduleBuilder.*
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-class DefaultScheduler implements InitializingBean, ApplicationContextAware {
+class DefaultScheduler implements InitializingBean {
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultScheduler)
 
-
-	AutowireCapableBeanFactory beanFactory
-	Scheduler scheduler
 	@Autowired
 	GrailsApplication grailsApplication
+
+	Scheduler scheduler
 	Map<String, String> jobs
 
 
@@ -56,17 +55,6 @@ class DefaultScheduler implements InitializingBean, ApplicationContextAware {
 	 */
 	void setJobs(Map<String, String> jobs) {
 		this.jobs = jobs
-	}
-
-
-	/**
-	 * Récupère le contexte Spring
-	 *
-	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
-	 */
-	@Override
-	void setApplicationContext(final ApplicationContext context) {
-		beanFactory = context.getAutowireCapableBeanFactory()
 	}
 
 
@@ -101,13 +89,14 @@ class DefaultScheduler implements InitializingBean, ApplicationContextAware {
 	void start() {
 		log.info "Starting jobs scheduling..."
 
-		scheduler.getListenerManager().addJobListener(new AutowireJobListener(beanFactory))
+		scheduler.getListenerManager().addJobListener(new AutowiredJobListener(grailsApplication))
 		scheduler.start()
 
 		// ajout des jobs injectés
 		jobs?.each { className, cron ->
 			Class jobClass = Class.forName(className)
 			Set triggers = [getTrigger(jobClass, cron)]
+			log.info "Scheduling {} : {}", jobClass, cron
 			scheduler.scheduleJob(getJobDetail(jobClass), triggers, true)
 		}
 	}

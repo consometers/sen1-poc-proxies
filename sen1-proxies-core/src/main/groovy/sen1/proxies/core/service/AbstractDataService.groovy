@@ -15,7 +15,7 @@ import grails.gorm.transactions.Transactional
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-abstract class AbstractDataService<T> extends AbstractService<T> {
+abstract class AbstractDataService<T> extends AbstractService {
 
 	/**
 	 * Enregistrement (création ou modification) d'une entité
@@ -25,6 +25,7 @@ abstract class AbstractDataService<T> extends AbstractService<T> {
 	 * @return domain
 	 * @throws Exception si erreurs de validation
 	 */
+	@Transactional(readOnly = false, rollbackFor = Exception)
 	T save(T domain) throws Exception {
 		assert (domain instanceof GormEntity)
 

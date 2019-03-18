@@ -3,6 +3,8 @@ package sen1.proxies.core.job
 import org.quartz.Job
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 
@@ -23,7 +25,7 @@ import sen1.proxies.core.scheduler.DefaultScheduler
  * - le converter pour transformer les données vers l'objet générique @see sen1.proxies.core.io.OutboxConverter<T, U extends MessageData>
  * - le serializer du format utilisé par le réseau fédéré @see sen1.proxies.core.io.MessageSerializer
  * 
- * Ce job ne pas tout faire car ca pourra prendre du temps si le nombre de consumers est élevé. Il va seulement charger
+ * Ce job ne va pas tout faire car ca pourrait prendre du temps si le nombre de consumers est élevé. Il va seulement charger
  * les consumers par lot, et lancer des tâches que des sous-jobs vont trouver. Cela va permettre de paralléliser le
  * traitement de tous les consumers
  * 
@@ -31,6 +33,9 @@ import sen1.proxies.core.scheduler.DefaultScheduler
  *
  */
 class PushOutboxMainJob implements Job {
+
+	static final Logger log = LoggerFactory.getLogger(PushOutboxMainJob)
+
 
 	@Autowired
 	OutboxConsumerService outboxConsumerService
@@ -55,13 +60,16 @@ class PushOutboxMainJob implements Job {
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		long consumerCount = outboxConsumerService.count()
+		log.info("Push datas to outbox for {} consumers", consumerCount)
 
 		// lecture par page de tous les consumers et délègue le traitement aux sous-jobs
 		if (consumerCount) {
 			for (long page=0; page<=consumerCount/paginationMaxBackend; page++) {
-				List<OutboxConsumer> consumers = outboxConsumerService.list(
-						[offset: page*paginationMaxBackend, max: paginationMaxBackend]
-						)
+				// WARN : ne pas oublier le sort dans le chargement des consumers du fait de la pagination
+				// sinon si plusieurs appels, les éléments retournés ne seront pas cohérents
+				List<OutboxConsumer> consumers = outboxConsumerService.list([offset: page*paginationMaxBackend,
+					max: paginationMaxBackend, sort: 'id'])
+
 				for (OutboxConsumer consumer : consumers) {
 					defaultScheduler.scheduleOneShotJob(PushOutboxSubJob, new Date(), [outboxConsumerId: consumer.id])
 				}

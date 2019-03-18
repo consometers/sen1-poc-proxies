@@ -14,7 +14,7 @@ import grails.gorm.transactions.Transactional
  *
  */
 @Transactional(readOnly = true)
-abstract class AbstractService<T> {
+abstract class AbstractService {
 
 	/**
 	 * Injecte par défaut pour chaque service le contexte Grails

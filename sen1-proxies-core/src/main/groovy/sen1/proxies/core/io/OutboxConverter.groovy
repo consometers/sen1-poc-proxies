@@ -15,14 +15,18 @@ import sen1.proxies.core.OutboxConsumer
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-interface OutboxConverter<T, U extends MessageData> {
+interface OutboxConverter<T> {
 	/**
-	 * Convertir une donnée du système local vers une donnée du réseau fédéré
+	 * Convertit une donnée du système local vers une donnée du réseau fédéré
+	 * Le message parent est déjà construit.
+	 * Ce converter doit juste s'occuper de remplir les datas du message et compléter si besoin le message
+	 * mais le message est logiquement déjà prêt
 	 * 
 	 * @param outboxConsumer
-	 * @param data
-	 * @return message
+	 * @param message
+	 * @param data donnée au format <T> à convertir
+	 * @return MessageData
 	 * @throws Exception
 	 */
-	Message<U> convert(OutboxConsumer outboxConsumer, T data) throws Exception
+	MessageData convert(OutboxConsumer outboxConsumer, Message message, T data) throws Exception
 }

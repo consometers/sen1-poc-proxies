@@ -172,8 +172,8 @@ class Warp10v0 implements Warp10 {
 	@Override
 	Date datapointTimestamp(JSONArray jsonValue) throws Exception {
 		assertDatapoint(jsonValue)
-		// TODO : micro ou milli second
-		return new Date((jsonValue.first() as Long) / 1000)
+		long milliseconds = ((jsonValue.first() as Long) / 1000) as Long
+		return new Date(milliseconds)
 	}
 
 

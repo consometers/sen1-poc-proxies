@@ -26,8 +26,27 @@ interface OutboxDataService {
 	/**
 	 * Liste les entités par pagination et sans filtre
 	 *
-	 * @param args control pagination and ordering
+	 * @param args control pagination, ordering, fetching
 	 * @return
 	 */
 	List<Outbox> list(Map args)
+
+
+	/**
+	 * Recherche par identifiant
+	 *
+	 * @param id
+	 * @return
+	 */
+	Outbox findById(long id)
+
+
+	/**
+	 * Recherche par identifiant
+	 *
+	 * @param id
+	 * @param args control fetching
+	 * @return
+	 */
+	Outbox findById(long id, Map args)
 }

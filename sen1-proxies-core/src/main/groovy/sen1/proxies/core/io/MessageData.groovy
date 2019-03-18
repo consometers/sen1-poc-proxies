@@ -7,9 +7,14 @@ package sen1.proxies.core.io
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-trait MessageData<T> {
+trait MessageData {
 	/**
 	 * Valeur de la donnée 
 	 */
-	T value
+	Object value
+
+	/**
+	 * Date donnée
+	 */
+	Date timestamp
 }

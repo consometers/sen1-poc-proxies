@@ -2,7 +2,8 @@ package sen1.proxies.core.scheduler
 
 import org.quartz.JobExecutionContext
 import org.quartz.listeners.JobListenerSupport
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory
+import grails.core.GrailsApplication
+import sen1.proxies.core.ApplicationUtils
 
 /**
  * Listener job pour injecter les propriéts Autowired
@@ -11,9 +12,9 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-class AutowireJobListener extends JobListenerSupport {
+class AutowiredJobListener extends JobListenerSupport {
 
-	AutowireCapableBeanFactory beanFactory
+	GrailsApplication grailsApplication
 
 
 	/**
@@ -21,8 +22,8 @@ class AutowireJobListener extends JobListenerSupport {
 	 * 
 	 * @param beanFactory
 	 */
-	AutowireJobListener(AutowireCapableBeanFactory beanFactory) {
-		this.beanFactory = beanFactory
+	AutowiredJobListener(GrailsApplication grailsApplication) {
+		this.grailsApplication = grailsApplication
 	}
 
 
@@ -35,7 +36,7 @@ class AutowireJobListener extends JobListenerSupport {
 	@Override
 	public void jobToBeExecuted(JobExecutionContext context) {
 		super.jobToBeExecuted(context)
-		beanFactory.autowireBean(context.getJobInstance())
+		ApplicationUtils.autowireBean(grailsApplication, context.getJobInstance())
 	}
 
 

@@ -4,12 +4,16 @@ import org.quartz.Job
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import grails.core.GrailsApplication
 import sen1.proxies.core.Outbox
 import sen1.proxies.core.OutboxConsumer
 import sen1.proxies.core.OutboxConsumerService
+import sen1.proxies.core.OutboxService
 import sen1.proxies.core.io.Message
 import sen1.proxies.core.io.MessageSerializer
 import sen1.proxies.core.io.OutboxConverter
+import sen1.proxies.core.io.message.MessageBuilder
 import sen1.proxies.core.service.PushOutboxService
 
 /**
@@ -27,6 +31,9 @@ class PushOutboxSubJob implements Job {
 	OutboxConsumerService outboxConsumerService
 
 	@Autowired
+	OutboxService outboxService
+
+	@Autowired
 	PushOutboxService pushOutboxService
 
 	@Autowired
@@ -34,6 +41,9 @@ class PushOutboxSubJob implements Job {
 
 	@Autowired
 	MessageSerializer messageSerializer
+
+	@Autowired
+	GrailsApplication grailsApplication
 
 
 	/** 
@@ -52,16 +62,32 @@ class PushOutboxSubJob implements Job {
 		// lecture des données depuis le système local
 		List datas = pushOutboxService.fetchData(outboxConsumer)
 
-		for(def data : datas) {
-			// passe chaque donnée reçue dans le converter de Message
-			Message message = outboxConverter.convert(outboxConsumer, data)
+		if (datas) {
+			// créé un nouveau message complété avec les infos du consumer
+			// et le passe dans le converter pour remplir les données
+			Message message = MessageBuilder.builder()
+					.name(outboxConsumer.name)
+					.metaname(outboxConsumer.metaname)
+					.metavalue(outboxConsumer.metavalue)
+					.unite(outboxConsumer.unite)
+					.type(outboxConsumer.type)
+					.applicationDst(outboxConsumer.consumer)
+					.applicationSrc(grailsApplication.config.info.app.name)
+					.build()
+
+			for (def data : datas) {
+				message.datas << outboxConverter.convert(outboxConsumer, message, data)
+			}
 
 			// construit un élément dans la outbox serialisé à partir du message
+			// et sauvegarde en base
 			Outbox outbox = new Outbox(consumer: outboxConsumer, receivedDate: new Date())
 			outbox.data = messageSerializer.write(message)
+			outboxService.save(outbox)
 
-			// sauvegarde en base
-			outboxConsumerService.save(outbox)
+			// met à jour le consumer avec la date de la dernière valeur
+			outboxConsumer.dateLastValue = message.dateLastValue()
+			outboxConsumerService.save(outboxConsumer)
 		}
 	}
 }

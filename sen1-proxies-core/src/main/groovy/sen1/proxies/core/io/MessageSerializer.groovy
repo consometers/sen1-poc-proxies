@@ -7,7 +7,7 @@ package sen1.proxies.core.io
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-interface MessageSerializer<T extends MessageData> {
+interface MessageSerializer {
 
 	/**
 	 * Lit un message depuis un buffer
@@ -16,7 +16,7 @@ interface MessageSerializer<T extends MessageData> {
 	 * @return Message
 	 * @throws Exception
 	 */
-	Message<T> read(byte[] buffer) throws Exception
+	Message read(byte[] buffer) throws Exception
 
 
 	/**
@@ -26,5 +26,5 @@ interface MessageSerializer<T extends MessageData> {
 	 * @return buffer
 	 * @throws Exception
 	 */
-	byte[] write(Message<T> message) throws Exception
+	byte[] write(Message message) throws Exception
 }

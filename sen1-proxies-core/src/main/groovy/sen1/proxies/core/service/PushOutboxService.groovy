@@ -9,10 +9,12 @@ import sen1.proxies.core.OutboxConsumer
  * Lit les dernières données
  * Ne fait aucune transformation
  * 
+ * <T> Le type de données renvoyé par le système local
+ * 
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-interface PushOutboxService {
+interface PushOutboxService<T> {
 	/**
 	 * Lecture des datas dans le système local pour un consumer
 	 * !! Les données sont renvoyées sans transformation
@@ -21,5 +23,5 @@ interface PushOutboxService {
 	 * @return
 	 * @throws Exception
 	 */
-	List fetchData(OutboxConsumer outboxConsumer) throws Exception
+	List<T> fetchData(OutboxConsumer outboxConsumer) throws Exception
 }

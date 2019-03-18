@@ -18,7 +18,7 @@ import sen1.proxies.pride.warp10.script.Warp10FetchScript
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-class PrideService extends AbstractService implements PushOutboxService {
+class PrideService extends AbstractService implements PushOutboxService<JSONArray> {
 
 	/**
 	 * Instance Warp10 injectée par Spring
@@ -50,7 +50,7 @@ class PrideService extends AbstractService implements PushOutboxService {
 	 * @see sen1.proxies.core.service.PushOutboxService#fetchData(sen1.proxies.core.OutboxConsumer)
 	 */
 	@Override
-	List fetchData(OutboxConsumer outboxConsumer) throws Exception {
+	List<JSONArray> fetchData(OutboxConsumer outboxConsumer) throws Exception {
 		Warp10FetchScript fetchScript = new Warp10FetchScript()
 				.token(readToken)
 				.selector("=${outboxConsumer.name}{${outboxConsumer.metaname}=${outboxConsumer.metavalue}}")
@@ -68,6 +68,7 @@ class PrideService extends AbstractService implements PushOutboxService {
 
 		// parse le contenu de la réponse Warp10 pour récupérer les valeurs
 		// le selector demandé est unique, donc on prend la 1ère série du json retourné
-		return warp10.datapoints(warp10Result, 0)
+		JSONArray datapoints = warp10.datapoints(warp10Result, 0)
+		return datapoints
 	}
 }

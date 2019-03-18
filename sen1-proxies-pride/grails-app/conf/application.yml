@@ -94,7 +94,6 @@ hibernate:
 environments:
     development:
         dataSource:
-            logSql: true
             formatSql: true
             pooled: true
             dbCreate: update
@@ -109,7 +108,6 @@ environments:
                 maxWait: 5000
     test:
         dataSource:
-            logSql: true
             formatSql: true
             pooled: true
             driverClassName: org.h2.Driver
@@ -165,3 +163,7 @@ sen1:
                 port: 8080
                 protocol: http
                 firstMaxValue: 500
+        core:
+            pagination:
+                maxView: 25
+                maxBackend: 100 

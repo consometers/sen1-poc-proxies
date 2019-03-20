@@ -19,6 +19,7 @@ apply plugin:"war"
 apply plugin:"org.grails.grails-web"
 apply plugin:"asset-pipeline"
 apply plugin:"org.grails.grails-gsp"
+apply plugin:"org.grails.grails-doc"
 
 repositories {
     mavenLocal()

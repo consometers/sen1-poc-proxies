@@ -11,12 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 
 import grails.gorm.transactions.Transactional
+import rocks.xmpp.addr.Jid
 import rocks.xmpp.core.XmppException
 import rocks.xmpp.core.net.ChannelEncryption
 import rocks.xmpp.core.net.client.SocketConnectionConfiguration
 import rocks.xmpp.core.sasl.AuthenticationException
+import rocks.xmpp.core.session.Extension
 import rocks.xmpp.core.session.XmppClient
+import rocks.xmpp.core.session.XmppSessionConfiguration
 import rocks.xmpp.core.stanza.MessageEvent
+import sen1.proxies.core.App
+import sen1.proxies.core.AppService
 import sen1.proxies.core.ConfigService
 import sen1.proxies.core.io.Message
 import sen1.proxies.core.io.message.MessageBuilder
@@ -27,7 +32,9 @@ import sen1.proxies.core.service.FederationService
  * Service XmppFederationService
  * 
  * Implémentation XMPP pour le réseau fédéré
- * Utilisation de la librairie Babbler https://sco0ter.bitbucket.io/babbler/index.html
+ * 
+ * Utilisation de la librairie Babbler
+ * @see https://sco0ter.bitbucket.io/babbler/index.html
  * 
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
@@ -43,6 +50,7 @@ class XmppFederationService extends AbstractService implements FederationService
 
 
 	private XmppClient xmppClient
+	private boolean xmppClientConnected
 
 	// doit être injecté à la construction du service
 	Consumer<Message> messageConsumer
@@ -57,6 +65,9 @@ class XmppFederationService extends AbstractService implements FederationService
 	@Autowired
 	ConfigService configService
 
+	@Autowired
+	AppService appService
+
 
 	/** (non-Javadoc)
 	 *
@@ -67,12 +78,19 @@ class XmppFederationService extends AbstractService implements FederationService
 			SSLContext sslContext = SSLContext.getInstance("TLSv1.2")
 			sslContext.init(null, null, new SecureRandom())
 
-			SocketConnectionConfiguration tcpConfiguration = SocketConnectionConfiguration.builder()
+			// forcer le chiffrement des échanges
+			SocketConnectionConfiguration sslConfiguration = SocketConnectionConfiguration.builder()
 					.channelEncryption(ChannelEncryption.REQUIRED)
 					.sslContext(sslContext)
 					.build()
 
-			xmppClient = XmppClient.create(configService.value(DOMAIN_CONFIG), tcpConfiguration)
+			// rajoute une extension pour serialiser un @see sen1.proxies.core.io.Message dans le stanza XMPP
+			XmppSessionConfiguration sessionConfiguration = XmppSessionConfiguration.builder()
+					.extensions(Extension.of(MessageBuilder.builder().build().getClass()))
+					.build()
+
+			// attention à l'ordre des configuration : d'abord la session puis les connections...
+			xmppClient = XmppClient.create(configService.value(DOMAIN_CONFIG), sessionConfiguration, sslConfiguration)
 		}
 
 		return xmppClient
@@ -134,6 +152,8 @@ class XmppFederationService extends AbstractService implements FederationService
 		} catch (AuthenticationException  | XmppException  e) {
 			throw new Exception(e)
 		}
+
+		xmppClientConnected = true
 	}
 
 
@@ -143,8 +163,10 @@ class XmppFederationService extends AbstractService implements FederationService
 	 */
 	@Override
 	void close() throws Exception {
-		log.info "Disconnect XMPP session : {}", applicationName
-		xmppClient?.close()
+		if (xmppClientConnected) {
+			log.info "Disconnect XMPP session : {}", applicationName
+			xmppClient?.close()
+		}
 	}
 
 
@@ -154,9 +176,22 @@ class XmppFederationService extends AbstractService implements FederationService
 	 */
 	@Override
 	void sendMessage(Message message) throws Exception {
-		assert xmppClient != null
-		log.debug "Send message to XMPP : {}", message
-		throw new Exception("Not implemented !")
+		if (xmppClientConnected) {
+			assert message != null
+			assert message.applicationDst != null
 
+			// recherche de l'application destination (le consumer)
+			App app = appService.findByName(message.applicationDst)
+
+			log.debug "Send XMPP message to {} [{}]", message.applicationDst, app.jid
+
+			// construction d'un message/stanza XMPP
+			// utiliser le type CHAT car que les messages soient conservés en attente sur le serveur XMPP
+			// (d'ailleurs en mode normal, le message n'est pas reçu .....)
+			rocks.xmpp.core.stanza.model.Message xmppMessage = new rocks.xmpp.core.stanza.model.Message(Jid.of(app.jid),
+					rocks.xmpp.core.stanza.model.Message.Type.CHAT)
+			xmppMessage.addExtension(message)
+			xmppClient.send(xmppMessage)
+		}
 	}
 }

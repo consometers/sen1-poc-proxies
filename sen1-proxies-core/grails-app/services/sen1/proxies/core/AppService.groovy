@@ -23,4 +23,15 @@ class AppService extends AbstractDataService<App> {
 	//@Autowired
 	//@Delegate
 	//AppDataService appDataService
+
+
+	/**
+	 * Recherche d'une application par son nom
+	 * 
+	 * @param name
+	 * @return App
+	 */
+	App findByName(String name) {
+		App.findByName(name)
+	}
 }

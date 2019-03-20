@@ -152,14 +152,10 @@ environments:
                 skipUpdateCheck: true
 
 ---
-#TODO : basculer ces propriétés dans un fichier externe du fait de la confidentialité des tokens
 sen1:
     proxies:
         pride:
             warp10:
-                host: 161.106.242.27
-                port: 8080
-                protocol: http
                 firstMaxValue: 500
         core:
             pagination:

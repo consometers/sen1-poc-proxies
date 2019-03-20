@@ -52,9 +52,13 @@ class PrideService extends AbstractService implements ProxyService<JSONArray> {
 	 */
 	@Override
 	List<JSONArray> fetchData(Consumer consumer) throws Exception {
+		// Warp10 utilise un nom de série (selector ou classname) commun à plusieurs objets.
+		// le consumer est configuré pour des objets multi-value, donc on inverse le raisonnement
+		// le label de Warp10 devient notre name/identifiant de l'objet et le classname/selector sera envoyé dans
+		// notre sous-valeur metaname. Le metavalue ne nous sert qu'à préciser le label
 		Warp10FetchScript fetchScript = new Warp10FetchScript()
 				.token(consumer.user.token)
-				.selector("=${consumer.name}{${consumer.metaname}=${consumer.metavalue}}")
+				.selector("=${consumer.metaname}{${consumer.metavalue}=${consumer.name}}")
 
 		// soit cette donnée a déjà été lue, et on ne charge que les données plus récentes au dernier chargement
 		if (consumer.dateLastValue) {

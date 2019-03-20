@@ -1,20 +1,20 @@
 package sen1.proxies.core.data
 
 import grails.gorm.services.Service
-import sen1.proxies.core.Outbox
+import sen1.proxies.core.Inbox
 
 
 /**
- * Service OutboxDataService
+ * Service InboxDataService
  * 
- * Service Data associé au domain sen1.proxies.core.Outbox
+ * Service Data associé au domain sen1.proxies.core.Inbox
  * Utilise l'AST GORM Service pour l'implémentation dynamique de l'interface
  * 
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-@Service(Outbox)
-interface OutboxDataService {
+@Service(Inbox)
+interface InboxDataService {
 	/**
 	 * Compte le nombre total d'entités
 	 * 
@@ -29,7 +29,7 @@ interface OutboxDataService {
 	 * @param args control pagination, ordering, fetching
 	 * @return
 	 */
-	List<Outbox> list(Map args)
+	List<Inbox> list(Map args)
 
 
 	/**
@@ -38,5 +38,5 @@ interface OutboxDataService {
 	 * @param id
 	 * @return
 	 */
-	Outbox findById(long id)
+	Inbox findById(long id)
 }

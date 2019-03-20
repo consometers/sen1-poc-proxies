@@ -3,10 +3,10 @@ package sen1.proxies.core
 import grails.gorm.transactions.Rollback
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import sen1.proxies.core.data.OutboxDataService
+import sen1.proxies.core.data.InboxDataService
 import spock.lang.Specification
 
-class OutboxServiceSpec extends Specification implements ServiceUnitTest<OutboxService>, DataTest{
+class InboxServiceSpec extends Specification implements ServiceUnitTest<InboxService>, DataTest{
 
 	/**
 	 * Setup avant chaque test
@@ -14,17 +14,17 @@ class OutboxServiceSpec extends Specification implements ServiceUnitTest<OutboxS
 	 * @return
 	 */
 	def setup() {
-		mockDomains(Outbox)
+		mockDomains(Inbox)
 		// le service data doit être injecté manuellement
-		//service.outboxDataService = dataStore.getService(OutboxDataService)
+		//service.inboxDataService = dataStore.getService(InboxDataService)
 	}
 
 
 	@Rollback
 	def "test count"() {
 		when:
-		new Outbox(data: [], receivedDate: new Date()).save(flush: true)
-		new Outbox(data: [], receivedDate: new Date()).save(flush: true)
+		new Inbox(data: [], receivedDate: new Date()).save(flush: true)
+		new Inbox(data: [], receivedDate: new Date()).save(flush: true)
 
 		then:
 		service.count() == 2
@@ -34,8 +34,8 @@ class OutboxServiceSpec extends Specification implements ServiceUnitTest<OutboxS
 	@Rollback
 	def "test list(pagination)"() {
 		when:
-		new Outbox(data: [], receivedDate: new Date()).save(flush: true)
-		new Outbox(data: [], receivedDate: new Date()).save(flush: true)
+		new Inbox(data: [], receivedDate: new Date()).save(flush: true)
+		new Inbox(data: [], receivedDate: new Date()).save(flush: true)
 
 		then:
 		service.list([:]).size() == 2

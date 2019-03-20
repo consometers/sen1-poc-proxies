@@ -7,14 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import grails.core.GrailsApplication
 import sen1.proxies.core.Outbox
-import sen1.proxies.core.OutboxConsumer
-import sen1.proxies.core.OutboxConsumerService
 import sen1.proxies.core.OutboxService
 import sen1.proxies.core.io.Message
 import sen1.proxies.core.io.MessageSerializer
 import sen1.proxies.core.io.OutboxConverter
 import sen1.proxies.core.io.message.MessageBuilder
-import sen1.proxies.core.service.PushOutboxService
+import sen1.proxies.core.service.FederationService
+import sen1.proxies.core.service.ProxyService
 
 /**
  * Job FetchOutboxSubJob
@@ -36,6 +35,9 @@ class FetchOutboxSubJob implements Job {
 	@Autowired
 	GrailsApplication grailsApplication
 
+	@Autowired
+	FederationService federationService
+
 
 	/**
 	 * 1. Charge la outbox
@@ -47,7 +49,14 @@ class FetchOutboxSubJob implements Job {
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		long outboxId = context.getJobDetail().getJobDataMap().getLong("outboxId")
-		Outbox outbox = outboxService.findById(outboxId, [fetch: [consumer: 'join']])
+		Outbox outbox = outboxService.findById(outboxId)
 		assert outbox != null
+
+		// récupère le message enregistré et l'envoit sur le réseau
+		Message message = messageSerializer.read(outbox.data)
+		federationService.sendMessage(message)
+
+		// si pas d'erreur à l'envoi, le message peut être supprimé
+		outboxService.delete(outbox)
 	}
 }

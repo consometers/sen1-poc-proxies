@@ -1,7 +1,5 @@
 package sen1.proxies.core.io
 
-import sen1.proxies.core.OutboxConsumer
-
 /**
  * Converter Outbox
  * 
@@ -22,11 +20,10 @@ interface OutboxConverter<T> {
 	 * Ce converter doit juste s'occuper de remplir les datas du message et compléter si besoin le message
 	 * mais le message est logiquement déjà prêt
 	 * 
-	 * @param outboxConsumer
 	 * @param message
 	 * @param data donnée au format <T> à convertir
 	 * @return MessageData
 	 * @throws Exception
 	 */
-	MessageData convert(OutboxConsumer outboxConsumer, Message message, T data) throws Exception
+	MessageData convert(Message message, T data) throws Exception
 }

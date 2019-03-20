@@ -30,40 +30,35 @@ class Warp10v0 implements Warp10 {
 
 
 	/**
-	 * Default constructor
+	 * (non-Javadoc)
+	 *
+	 * @see sen1.proxies.pride.warp10.Warp10#fetchText(java.lang.String, sen1.proxies.pride.warp10.Warp10Fetch)
 	 */
-	Warp10v0() {
-		apiVersion = "0"
+	@Override
+	String fetchText(String url, Warp10Fetch fetchParam) throws Exception {
+		return this.fetch(url, fetchParam, Warp10FormatEnum.text)
 	}
 
 
-	/** (non-Javadoc)
+	/**
+	 * (non-Javadoc)
 	 *
-	 * @see sen1.proxies.pride.warp10.Warp10#fetchText(sen1.proxies.pride.warp10.Warp10Fetch)
+	 * @see sen1.proxies.pride.warp10.Warp10#fetchFulltext(java.lang.String, sen1.proxies.pride.warp10.Warp10Fetch)
 	 */
 	@Override
-	String fetchText(Warp10Fetch fetchParam) throws Exception {
-		return this.fetch(fetchParam, Warp10FormatEnum.text)
+	String fetchFulltext(String url, Warp10Fetch fetchParam) throws Exception {
+		return this.fetch(url, fetchParam, Warp10FormatEnum.fulltext)
 	}
 
 
-	/** (non-Javadoc)
+	/**
+	 * (non-Javadoc)
 	 *
-	 * @see sen1.proxies.pride.warp10.Warp10#fetchFulltext(sen1.proxies.pride.warp10.Warp10Fetch)
+	 * @see sen1.proxies.pride.warp10.Warp10#fetchJson(java.lang.String, sen1.proxies.pride.warp10.Warp10Fetch)
 	 */
 	@Override
-	String fetchFulltext(Warp10Fetch fetchParam) throws Exception {
-		return this.fetch(fetchParam, Warp10FormatEnum.fulltext)
-	}
-
-
-	/** (non-Javadoc)
-	 *
-	 * @see sen1.proxies.pride.warp10.Warp10#fetchJson(sen1.proxies.pride.warp10.Warp10Fetch)
-	 */
-	@Override
-	JSONElement fetchJson(Warp10Fetch fetchParam) throws Exception {
-		return this.fetch(fetchParam, Warp10FormatEnum.json)
+	JSONElement fetchJson(String url, Warp10Fetch fetchParam) throws Exception {
+		return this.fetch(url, fetchParam, Warp10FormatEnum.json)
 	}
 
 
@@ -71,17 +66,18 @@ class Warp10v0 implements Warp10 {
 	 * Méthode interne pour faire les appels fetch
 	 * Le type retourné dépend du paramètre format
 	 * 
+	 * @param url
 	 * @param fetchParam
 	 * @param format
 	 * @return
 	 * @throws Exception
 	 */
-	private Object fetch(Warp10Fetch fetchParam, Warp10FormatEnum format) throws Exception {
+	private Object fetch(String url, Warp10Fetch fetchParam, Warp10FormatEnum format) throws Exception {
 		this.asserts()
 		assert fetchParam != null
 		fetchParam.asserts()
 
-		Http http = Http.Get("${protocol}://${server}:${port}/api/v${apiVersion}/fetch")
+		Http http = Http.Get("${url}/v0/fetch")
 				.header("X-Warp10-Token", fetchParam.token)
 				.queryParam("selector", fetchParam.selector)
 				.queryParam("format", format.toString())
@@ -116,17 +112,18 @@ class Warp10v0 implements Warp10 {
 	}
 
 
-	/** (non-Javadoc)
+	/**
+	 * (non-Javadoc)
 	 *
-	 * @see sen1.proxies.pride.warp10.Warp10#exec(sen1.proxies.pride.warp10.Warp10Script)
+	 * @see sen1.proxies.pride.warp10.Warp10#exec(java.lang.String, sen1.proxies.pride.warp10.Warp10Script)
 	 */
 	@Override
-	JSONElement exec(Warp10Script warpScript) throws Exception {
+	JSONElement exec(String url, Warp10Script warpScript) throws Exception {
 		this.asserts()
 		assert warpScript != null
 		warpScript.asserts()
 
-		Http http = Http.Post("${protocol}://${server}:${port}/api/v${apiVersion}/exec")
+		Http http = Http.Post("${url}/v0/exec")
 				.bodyString(warpScript.script())
 
 		return http.execute(new JsonResponseTransformer())?.content

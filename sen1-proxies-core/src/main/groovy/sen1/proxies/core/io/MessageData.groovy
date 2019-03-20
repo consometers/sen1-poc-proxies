@@ -7,14 +7,16 @@ package sen1.proxies.core.io
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-trait MessageData {
+interface MessageData {
 	/**
 	 * Valeur de la donnée 
 	 */
-	Object value
+	Object getValue()
+	void setValue(Object value)
 
 	/**
 	 * Date donnée
 	 */
-	Date timestamp
+	Date getTimestamp()
+	void setTimestamp(Date timestamp)
 }

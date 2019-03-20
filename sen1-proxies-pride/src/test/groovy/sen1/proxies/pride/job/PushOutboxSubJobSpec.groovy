@@ -18,7 +18,8 @@ class PushOutboxSubJobSpec extends Specification implements GrailsUnitTest {
 	@Override
 	Closure doWithSpring() {
 		def beans = {
-			outboxConsumerService(sen1.proxies.core.OutboxConsumerService)
+			consumerService(sen1.proxies.core.ConsumerService)
+			configService(sen1.proxies.core.ConfigService)
 			outboxService(sen1.proxies.core.OutboxService)
 			prideService(sen1.proxies.pride.PrideService)
 			warp10(sen1.proxies.pride.warp10.impl.Warp10v0)
@@ -59,10 +60,10 @@ class PushOutboxSubJobSpec extends Specification implements GrailsUnitTest {
 
 		then:
 		pushOutboxSubJob.messageSerializer != null
-		pushOutboxSubJob.outboxConsumerService != null
+		pushOutboxSubJob.consumerService != null
 		pushOutboxSubJob.outboxService != null
 		pushOutboxSubJob.outboxConverter != null
-		pushOutboxSubJob.pushOutboxService != null
-		pushOutboxSubJob.pushOutboxService instanceof PrideService
+		pushOutboxSubJob.proxyService != null
+		pushOutboxSubJob.proxyService instanceof PrideService
 	}
 }

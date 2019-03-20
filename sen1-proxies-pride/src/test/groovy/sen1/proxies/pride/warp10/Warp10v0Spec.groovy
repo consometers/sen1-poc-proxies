@@ -11,6 +11,7 @@ class Warp10v0Spec extends Specification implements GrailsUnitTest {
 
 	private static final String TOKEN = "JrwmTJHEYRs4CfQ81_ftw_hKKfhzPl8SSb5t_LFOYYrLfjd8UnPoJM0l9teHvuGN8JkCzy5LgicYb.uxHCpBwzrX15xfTkeX6hgTpujwLfwZbUzZwzaxeaXibW3_xVIiP_twQIp6tIaJDiirhjEKPL3DNv0FRtRp"
 	private static final String PRM = "30001450710424"
+	private static final String URL = "http://161.106.242.27:8080/api"
 
 	@Shared
 	Warp10 warp10Read
@@ -23,15 +24,12 @@ class Warp10v0Spec extends Specification implements GrailsUnitTest {
 	 */
 	def setupSpec() {
 		warp10Read = new Warp10v0()
-		warp10Read.server = "161.106.242.27"
-		warp10Read.protocol = "http"
-		warp10Read.port = 8080
 	}
 
 
 	void "API FETCH : invalid params throw AssertionError"() {
 		when:"Invalid params"
-		warp10Read.fetchText(new Warp10Fetch())
+		warp10Read.fetchText(URL, new Warp10Fetch())
 
 		then:"Throw AssertionError"
 		thrown AssertionError
@@ -41,7 +39,7 @@ class Warp10v0Spec extends Specification implements GrailsUnitTest {
 	void "API FETCH : valid params get text response"() {
 		when:"Valid params"
 		// récupère les 10 dernières valeurs
-		def result = warp10Read.fetchText(new Warp10Fetch()
+		def result = warp10Read.fetchText(URL, new Warp10Fetch()
 				.token(TOKEN)
 				.selector("=pride.enedis.cdc{PRM=${PRM}}")
 				.now(new Date())
@@ -55,7 +53,7 @@ class Warp10v0Spec extends Specification implements GrailsUnitTest {
 
 	void "API EXEC : invalid params throw AssertionError"() {
 		when:"Invalid params"
-		warp10Read.exec(new Warp10FetchScript())
+		warp10Read.exec(URL, new Warp10FetchScript())
 
 		then:"Throw AssertionError"
 		thrown AssertionError
@@ -65,7 +63,7 @@ class Warp10v0Spec extends Specification implements GrailsUnitTest {
 	void "API EXEC : valid params get json response"() {
 		when:"Valid params"
 		// récupère les 10 dernières valeurs
-		def result = warp10Read.exec(new Warp10FetchScript()
+		def result = warp10Read.exec(URL, new Warp10FetchScript()
 				.token(TOKEN)
 				.selector("=pride.enedis.cdc{PRM=${PRM}}")
 				.end(new Date())

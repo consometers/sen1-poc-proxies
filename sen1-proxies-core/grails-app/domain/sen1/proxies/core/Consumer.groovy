@@ -1,20 +1,24 @@
 package sen1.proxies.core
 
 /**
- * Domain OutboxConsumer
+ * Domain Consumer
  * 
- * Les consumers d'une donnée
+ * Les consumers d'une donnée dans le système local
  * Les propriétés de la donnée sont à interpréter dans le contexte du système local
  * 
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-class OutboxConsumer {
+class Consumer {
 
 	/**
-	 * Nom de l'application consumer dans le réseau fédéré
+	 * Application dans le réseau fédéré à qui envoyer les données
 	 */
-	String consumer
+	App app
+	/**
+	 * Utilisateur des données
+	 */
+	User user
 	/**
 	 * Nom/identifiant de la donnée dans le système local
 	 */
@@ -39,25 +43,17 @@ class OutboxConsumer {
 	 * Le timestamp de la dernière data "consumée"
 	 */
 	Date dateLastValue
-	/**
-	 * Les données à envoyer au consumer
-	 */
-	Set<Outbox> outbox = []
-
-
-	/**
-	 * @ToMany associations
-	 */
-	static hasMany = [
-		outbox: Outbox,
-	]
 
 
 	/**
 	 * Domain Validation
 	 */
 	static constraints = {
-		consumer unique: ['name', 'metaname']
+		user unique: [
+			'name',
+			'metaname',
+			'metavalue'
+		]
 		metaname nullable: true
 		metavalue nullable: true
 		unite nullable: true
@@ -69,8 +65,7 @@ class OutboxConsumer {
 	 * Domain Database Mapping
 	 */
 	static mapping = {
-		comment 'Outbox Consumer'
+		comment 'Consumer'
 		table schema: ProxyConstantes.DBSCHEMA
-		outbox cascade: 'all-delete-orphan'
 	}
 }

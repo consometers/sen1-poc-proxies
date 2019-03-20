@@ -24,14 +24,14 @@ appender('STDOUT', ConsoleAppender) {
 
 switch (Environment.getCurrentEnvironment()) {
 	case Environment.PRODUCTION:
-		logger "sen1.proxies.pride", INFO
+		logger "sen1.proxies", INFO
 		logger "grails.app", INFO
 		root ERROR, ['STDOUT']
 		break
 
 	case Environment.TEST:
 	case Environment.DEVELOPMENT:
-		logger "sen1.proxies.pride", DEBUG
+		logger "sen1.proxies", DEBUG
 		logger "org.hibernate.SQL", DEBUG
 		logger "grails.app", DEBUG
 		root INFO, ['STDOUT']

@@ -136,4 +136,17 @@ class MessageBuilder {
 		message.applicationDst = applicationDst
 		return this
 	}
+
+
+	/**
+	 * Set username
+	 * @see sen1.proxies.core.io.Message.username
+	 *
+	 * @param username
+	 * @return
+	 */
+	MessageBuilder username(String username) {
+		message.username = username
+		return this
+	}
 }

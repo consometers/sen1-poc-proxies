@@ -3,8 +3,7 @@ package sen1.proxies.core
 /**
  * Domain Outbox
  * 
- * Contient les données à envoyer aux consumers
- * Elles sont extraites depuis le système local
+ * Les données qui viennt du système local et qui doivent être envoyées sur le réseau fédéré
  * 
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
@@ -12,23 +11,13 @@ package sen1.proxies.core
 class Outbox {
 
 	/**
-	 * Les données à envoyer au consumer et extraites depuis le système local
+	 * Un objet de type sen1.proxies.core.io.Message sérialisé
 	 */
 	byte[] data
 	/**
 	 * Date de réception des données
 	 */
 	Date receivedDate
-	/**
-	 * Le consumer associé
-	 */
-	OutboxConsumer consumer
-
-
-	/**
-	 * Bidirectionnal @ToMany
-	 */
-	static belongsTo = [consumer: OutboxConsumer]
 
 
 	/**
@@ -44,7 +33,7 @@ class Outbox {
 	 * Domain Database Mapping
 	 */
 	static mapping = {
-		comment "Outbox Data To Consumer"
+		comment "Outbox Data"
 		table schema: ProxyConstantes.DBSCHEMA
 		version false
 	}

@@ -1,10 +1,14 @@
 package sen1.proxies.core.service
 
+import java.lang.reflect.ParameterizedType
+
 import org.grails.datastore.gorm.GormEntity
 import org.grails.datastore.gorm.GormValidateable
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import sen1.proxies.core.App
+import sen1.proxies.core.Consumer
 
 /**
  * Class de base pour les services data/transactionnels 
@@ -15,7 +19,20 @@ import grails.gorm.transactions.Transactional
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
+@Transactional(readOnly = true)
 abstract class AbstractDataService<T> extends AbstractService {
+
+
+	/**
+	 * Renvoit le type paramétré <T> du service actuel
+	 * 
+	 * @return Class<T> sur l'instance actuelle
+	 */
+	private Class<T> getGenericType() {
+		Class<T> type = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0]
+		return type
+	}
+
 
 	/**
 	 * Enregistrement (création ou modification) d'une entité
@@ -35,5 +52,69 @@ abstract class AbstractDataService<T> extends AbstractService {
 		}
 
 		return domain.save()
+	}
+
+
+	/**
+	 * Suppression d'une entité
+	 * 
+	 * @param domain
+	 * @throws Exception
+	 */
+	@Transactional(readOnly = false, rollbackFor = Exception)
+	void delete(T domain) throws Exception {
+		domain.delete()
+	}
+
+
+	/**
+	 * Recherche d'une entité par son  ID et charge les associations
+	 *
+	 * @param id
+	 * @param associations
+	 * @return <T>
+	 */ 
+	T findByIdFetch(long id, String... associations) {
+		Map fetchMap = [:]
+
+		if (associations) {
+			for (String association : associations) {
+				fetchMap[(association)] = 'join'
+			}
+		}
+
+		return getGenericType().findById(id, [fetch: fetchMap])
+	}
+
+
+	/**
+	 * Compte le nombre total d'entités
+	 *
+	 * @return nb entité
+	 */
+	long count() {
+		getGenericType().count()
+	}
+
+
+	/**
+	 * Recherche par identifiant
+	 *
+	 * @param id
+	 * @return <T>
+	 */
+	T findById(long id) {
+		getGenericType().findById(id)
+	}
+
+
+	/**
+	 * Liste les entités par pagination et sans filtre
+	 *
+	 * @param pagination control pagination and ordering
+	 * @return
+	 */
+	List<T> list(Map pagination) {
+		getGenericType().list(pagination)
 	}
 }

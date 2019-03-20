@@ -157,8 +157,6 @@ sen1:
     proxies:
         pride:
             warp10:
-                readToken: JrwmTJHEYRs4CfQ81_ftw_hKKfhzPl8SSb5t_LFOYYrLfjd8UnPoJM0l9teHvuGN8JkCzy5LgicYb.uxHCpBwzrX15xfTkeX6hgTpujwLfwZbUzZwzaxeaXibW3_xVIiP_twQIp6tIaJDiirhjEKPL3DNv0FRtRp
-                writeToken: xHDA4GXT4DDptBvudEKu0Mktd5pPx6WbZVJA1.hyfHg4lRL.0ArHQEG9IljPDLgJTdAId4wr3ee_9T1vWQ9y9K6Zi0REdye1U1_KzoPcscOE.1JNO6ZRrYOeNHb.IR1wD4fXGh3moYEc5h0ZsKQzBF
                 host: 161.106.242.27
                 port: 8080
                 protocol: http

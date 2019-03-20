@@ -19,33 +19,11 @@ import groovy.transform.builder.SimpleStrategy
  *
  */
 trait Warp10 {
-	/**
-	 * API version
-	 */
-	String apiVersion
-
-	/**
-	 * Protocole pour la requête HTTP
-	 *
-	 */
-	String protocol
-
-	/**
-	 * Infos de connexion au serveur Warp10
-	 * Comme le protocole est par défaut https, le port aussi
-	 */
-	String server
-	int port
-
 
 	/**
 	 * Vérifie les paramètres avant exécution d'un appel à l'API
 	 */
 	void asserts() {
-		assert server != null
-		assert protocol != null
-		assert apiVersion != null
-		assert port > 0
 	}
 
 	/**
@@ -64,11 +42,12 @@ trait Warp10 {
 	 * You can use this endpoint to dump all the data accessible with a given token. The time needed for data retrieval
 	 * is dependent on the size of the retrieved dataset.
 	 * 
+	 * @param url server
 	 * @param fetchParam
 	 * @return
 	 * @throws Exception
 	 */
-	abstract String fetchText(Warp10Fetch fetchParam) throws Exception
+	abstract String fetchText(String url, Warp10Fetch fetchParam) throws Exception
 
 	/**
 	 * Exécution d'un appel fetch pour retrouver les données au format "fulltext"
@@ -84,11 +63,12 @@ trait Warp10 {
 	 * You can use this endpoint to dump all the data accessible with a given token. The time needed for data retrieval
 	 * is dependent on the size of the retrieved dataset.
 	 * 
+	 * @param url
 	 * @param fetchParam
 	 * @return
 	 * @throws Exception
 	 */
-	abstract String fetchFulltext(Warp10Fetch fetchParam) throws Exception
+	abstract String fetchFulltext(String url, Warp10Fetch fetchParam) throws Exception
 
 	/**
 	 * Exécution d'un appel "fetch" pour retrouver les données au format "json"
@@ -102,11 +82,12 @@ trait Warp10 {
 	 * You can use this endpoint to dump all the data accessible with a given token. The time needed for data retrieval
 	 * is dependent on the size of the retrieved dataset.
 	 * 
+	 * @param url
 	 * @param fetchParam
 	 * @return
 	 * @throws Exception
 	 */
-	abstract JSONElement fetchJson(Warp10Fetch fetchParam) throws Exception
+	abstract JSONElement fetchJson(String url, Warp10Fetch fetchParam) throws Exception
 
 	/**
 	 * Exécution d'un appel "exec" pour exécuter un WarpScript et retourner du contenu JSON
@@ -118,11 +99,12 @@ trait Warp10 {
 	 * The HTTP endpoint used by the WarpScript™ API is https://HOST:PORT/api/vX/exec, where HOST:PORT is a valid
 	 * endpoint for the public Warp 10™ API and vX is the version of the API you want to use (currently v0).
 	 *
+	 * @param url
 	 * @param warpScript
 	 * @return
 	 * @throws Exception
 	 */
-	abstract JSONElement exec(Warp10Script warpScript) throws Exception
+	abstract JSONElement exec(String url, Warp10Script warpScript) throws Exception
 
 	/**
 	 * Parse le contenu d'une réponse Warp10 et renvoit les datapoints de la série correspondant à l'index demandé

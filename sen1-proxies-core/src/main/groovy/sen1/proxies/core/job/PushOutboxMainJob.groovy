@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 
-import sen1.proxies.core.OutboxConsumer
-import sen1.proxies.core.OutboxConsumerService
+import sen1.proxies.core.Consumer
+import sen1.proxies.core.ConsumerService
 import sen1.proxies.core.scheduler.DefaultScheduler
 
 /**
@@ -38,7 +38,7 @@ class PushOutboxMainJob implements Job {
 
 
 	@Autowired
-	OutboxConsumerService outboxConsumerService
+	ConsumerService consumerService
 
 	@Autowired
 	DefaultScheduler defaultScheduler
@@ -59,19 +59,19 @@ class PushOutboxMainJob implements Job {
 	 */
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		long consumerCount = outboxConsumerService.count()
-		log.info("Push datas to outbox for {} consumers", consumerCount)
+		long consumerCount = consumerService.count()
+		log.info("Push datas to outbox : {} consumers", consumerCount)
 
 		// lecture par page de tous les consumers et délègue le traitement aux sous-jobs
 		if (consumerCount) {
 			for (long page=0; page<=consumerCount/paginationMaxBackend; page++) {
 				// WARN : ne pas oublier le sort dans le chargement des consumers du fait de la pagination
 				// sinon si plusieurs appels, les éléments retournés ne seront pas cohérents
-				List<OutboxConsumer> consumers = outboxConsumerService.list([offset: page*paginationMaxBackend,
+				List<Consumer> consumers = consumerService.list([offset: page*paginationMaxBackend,
 					max: paginationMaxBackend, sort: 'id'])
 
-				for (OutboxConsumer consumer : consumers) {
-					defaultScheduler.scheduleOneShotJob(PushOutboxSubJob, new Date(), [outboxConsumerId: consumer.id])
+				for (Consumer consumer : consumers) {
+					defaultScheduler.scheduleOneShotJob(PushOutboxSubJob, new Date(), [consumerId: consumer.id])
 				}
 			}
 		}

@@ -1,8 +1,16 @@
 package sen1.proxies.core.io.serialiser
 
+import javax.xml.bind.JAXBContext
+import javax.xml.bind.Marshaller
+import javax.xml.bind.Unmarshaller
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import grails.converters.XML
 import sen1.proxies.core.io.Message
 import sen1.proxies.core.io.MessageSerializer
+import sen1.proxies.core.io.message.MessageBuilder
 
 /**
  * Implémentation XML d'un message
@@ -12,13 +20,20 @@ import sen1.proxies.core.io.MessageSerializer
  */
 class XmlMessageSerializer implements MessageSerializer {
 
+	static Logger log = LoggerFactory.getLogger(XmlMessageSerializer)
+
+	// déclare une seule fois le contexte à partir de l'implémentation par défaut
+	JAXBContext context = JAXBContext.newInstance(MessageBuilder.builder().build().getClass())
+
+
 	/** (non-Javadoc)
 	 *
 	 * @see sen1.proxies.core.io.MessageSerializer#read(byte[])
 	 */
 	@Override
 	Message read(byte[] buffer) throws Exception {
-		return new XML().parse(new String(buffer))
+		Unmarshaller unmarshaller = context.createUnmarshaller()
+		return unmarshaller.unmarshal(new ByteArrayInputStream(buffer))
 	}
 
 
@@ -28,6 +43,10 @@ class XmlMessageSerializer implements MessageSerializer {
 	 */
 	@Override
 	byte[] write(Message message) throws Exception {
-		return new XML(message).toString().getBytes()
+		Marshaller marshaller = context.createMarshaller()
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
+		ByteArrayOutputStream outStream = new ByteArrayOutputStream()
+		marshaller.marshal(message, outStream)
+		return outStream.toByteArray()
 	}
 }

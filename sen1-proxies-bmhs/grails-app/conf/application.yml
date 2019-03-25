@@ -115,7 +115,7 @@ environments:
             url: jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
     production:
         dataSource:
-            jndiName: java:comp/env/sen1ProxyBmhsDataSource
+            jndiName: java:comp/env/sen1ProxyDataSource
                      
 ---
 quartz:
@@ -130,14 +130,14 @@ quartz:
         tablePrefix: quartz.QRTZ_
         class: org.quartz.impl.jdbcjobstore.JobStoreTX
         driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
-        dataSource: sen1ProxyBmhsDataSource
+        dataSource: sen1ProxyDataSource
         clusterCheckinInterval: 20000
 
 environments:
     development:
         quartz:
             dataSource:
-                sen1ProxyBmhsDataSource:
+                sen1ProxyDataSource:
                     driver: org.postgresql.Driver
                     URL: jdbc:postgresql://localhost:5432/sen1-proxy-bmhs
                     user: postgres
@@ -146,8 +146,8 @@ environments:
     production:
         quartz:
             dataSource:
-                sen1ProxyBmhsDataSource:
-                    jndiURL: java:comp/env/sen1ProxyBmhsDataSource
+                sen1ProxyDataSource:
+                    jndiURL: java:comp/env/sen1ProxyDataSource
             scheduler:
                 skipUpdateCheck: true
 

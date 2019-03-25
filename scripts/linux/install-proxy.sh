@@ -28,6 +28,46 @@ read -p "HTTP port [default=8080]: " HTTP_PORT
 read -p "HTTPS port [default=8443]: " HTTPS_PORT
 read -p "AJP port [default=8009]: " AJP_PORT
 read -p "SHUTDOWN port [default=8005]: " SHUTDOWN_PORT
+read -p "JDBC host [default=localhost]: " JDBC_HOST
+read -p "JDBC port [default=5432]: " JDBC_PORT
+read -p "JDBC database: " JDBC_DATABASE
+read -p "JDBC user [default=postgres]: " JDBC_USER
+read -p -s "JDBC password: " JDBC_PASSWORD
+
+if [ -z "$JAVA_HOME" ]; then
+  echo "Java home is required !"
+  exit 1
+fi
+
+if [ -z "$GRAILS_HOME" ]; then
+  echo "Grails home is required !"
+  exit 1
+fi
+
+if [ -z "$CATALINA_HOME" ]; then
+  echo "Catalina home is required !"
+  exit 1
+fi
+
+if [ -z "$PROXY_PATH" ]; then
+  echo "Proxy path is required !"
+  exit 1
+fi
+
+if [ -z "$INSTANCE_PATH" ]; then
+  echo "Instance path is required !"
+  exit 1
+fi
+
+if [ -z "$JDBC_DATABASE" ]; then
+  echo "JDBC database is required !"
+  exit 1
+fi
+
+if [ -z "$JDBC_PASSWORD" ]; then
+  echo "JDBC password is required !"
+  exit 1
+fi
 
 
 # Init variable
@@ -89,10 +129,17 @@ cp \$WAR_FILE \$INSTANCE/webapps/${PROXY_NAME}.war
 
 sed -i -e "s/serverId.pid/\${INSTANCE_NAME}.pid/g" \$INSTANCE/bin/setenv.sh
 sed -i -e "s/serverId=serverId/serverId=\${INSTANCE_NAME}/g" \$INSTANCE/bin/setenv.sh
+
 sed -i -e "s/port=\"8005\"/port=\"${INSTANCE_ID}${SHUTDOWN_PORT:-8005}\"/g" \$INSTANCE/conf/server.xml
 sed -i -e "s/port=\"8080\"/port=\"${INSTANCE_ID}${HTTP_PORT:-8080}\"/g" \$INSTANCE/conf/server.xml
 sed -i -e "s/redirectPort=\"8443\"/redirectPort=\"${INSTANCE_ID}${HTTPS_PORT:-8443}\"/g" \$INSTANCE/conf/server.xml
 sed -i -e "s/port=\"8009\"/port=\"${INSTANCE_ID}${AJP_PORT:-8009}\"/g" \$INSTANCE/conf/server.xml
+
+sed -i -e "s/#jdbc-host#/\${JDBC_HOST:-localhost}/g" \$INSTANCE/conf/context.xml
+sed -i -e "s/#jdbc-port#/\${JDBC_PORT:-5432}/g" \$INSTANCE/conf/context.xml
+sed -i -e "s/#jdbc-database#/\${JDBC_DATABASE}/g" \$INSTANCE/conf/context.xml
+sed -i -e "s/#jdbc-user#/\${JDBC_USER:-postgres}/g" \$INSTANCE/conf/context.xml
+sed -i -e "s/#jdbc-password#/\${JDBC_PASSWORD}/g" \$INSTANCE/conf/context.xml
 EOF
 
 chmod +x ${PATH_SCRIPT}/${PROXY_NAME}-deploy.sh

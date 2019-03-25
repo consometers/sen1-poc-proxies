@@ -49,4 +49,15 @@ class XmlMessageSerializer implements MessageSerializer {
 		marshaller.marshal(message, outStream)
 		return outStream.toByteArray()
 	}
+
+
+	//	static void main(String[] args) {
+	//		XmlMessageSerializer serializer = new XmlMessageSerializer()
+	//		Message message = MessageBuilder.builder().applicationDst("sen-pride").username("greg").build()
+	//		message.addData(message.newMessageDataInstance(100, new Date()))
+	//		message.addData(message.newMessageDataInstance(200, new Date()))
+	//		byte[] xml = serializer.write(message)
+	//
+	//		println new String(xml)
+	//	}
 }

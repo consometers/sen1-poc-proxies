@@ -23,4 +23,20 @@ class ConsumerService extends AbstractDataService<Consumer> {
 	//	@Autowired
 	//	//@Delegate
 	//	ConsumerDataService consumerDataService
+
+	/**
+	 * Recherche par identifiant avec fetch des associations (et en cascade sur app et user depuis userApp)
+	 * 
+	 * @param consumerId
+	 * @return
+	 */
+	Consumer findByIdFetchAll(long consumerId) {
+		return Consumer.createCriteria().get {
+			eq 'id', consumerId
+			join 'consumerApp'
+			join 'userApp'
+			join 'userApp.user'
+			join 'userApp.app'
+		}
+	}
 }

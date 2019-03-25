@@ -106,4 +106,11 @@ interface Message<T extends MessageData> {
 	 * @return
 	 */
 	Date dateLastValue()
+
+
+	/**
+	 * Vérification validité message
+	 * 
+	 */
+	void asserts()
 }

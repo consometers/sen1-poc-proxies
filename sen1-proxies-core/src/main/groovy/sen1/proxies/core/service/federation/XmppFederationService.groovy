@@ -125,12 +125,19 @@ class XmppFederationService extends AbstractService implements FederationService
 					@Override
 					void accept(MessageEvent event) {
 						rocks.xmpp.core.stanza.model.Message xmppMessage = event.getMessage()
-						Message message = MessageBuilder.builder().applicationDst(applicationName).build()
+						Message message = xmppMessage.getExtension(MessageBuilder.builder().build().getClass())
 
-						if (messageConsumer) {
-							messageConsumer.accept(message)
+						// on ne traite que des messages valides
+						if (message) {
+							message.asserts()
+
+							if (messageConsumer) {
+								messageConsumer.accept(message)
+							} else {
+								log.warn("cannot consume message : no function !")
+							}
 						} else {
-							log.warn("cannot consume message : no function !")
+							log.warn("Empty xmpp message !")
 						}
 					}
 				})
@@ -178,7 +185,8 @@ class XmppFederationService extends AbstractService implements FederationService
 	void sendMessage(Message message) throws Exception {
 		if (xmppClientConnected) {
 			assert message != null
-			assert message.applicationDst != null
+			// on n'envoit que des messages valides
+			message.asserts()
 
 			// recherche de l'application destination (le consumer)
 			App app = appService.findByName(message.applicationDst)

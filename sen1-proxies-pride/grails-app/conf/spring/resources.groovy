@@ -15,11 +15,9 @@ beans = {
 	defaultScheduler(sen1.proxies.core.scheduler.DefaultScheduler) {
 		jobs = [
 			// Fetch les données Pride des compteurs référencés dans le proxy (toutes les 5 min)
-			'sen1.proxies.core.job.PushOutboxMainJob' : '0 * * * * ?',
+			'sen1.proxies.core.job.PushOutboxMainJob' : '0 0/5 * * * ?',
 			// Fetch les données de la outbox et les envoit sur le réseau fédéré (toutes les 5 min)
-			'sen1.proxies.core.job.FetchOutboxMainJob': '0 * * * * ?'
-			// Fetch les données de la inbox et les envoit vers Pride (toutes les 5 min)
-			//'sen1.proxies.core.job.FetchInboxMainJob': '0 * * * * ?'
+			'sen1.proxies.core.job.FetchOutboxMainJob': '0 0/5 * * * ?'
 		]
 	}
 
@@ -44,7 +42,9 @@ beans = {
 
 	// implémentation XMPP pour le réseau fédéré
 	// pour démarrer le service et l'initialiser correctement : @see sen1.proxies.pride.BootStrap
-	federationService(sen1.proxies.core.service.federation.XmppFederationService) { messageConsumer = ref('messageConsumer') }
-
+	federationService(sen1.proxies.core.service.federation.XmppFederationService) {
+		// injecte le consumer de message
+		messageConsumer = ref('messageConsumer')
+	}
 
 }

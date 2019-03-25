@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlElement
 import javax.xml.bind.annotation.XmlElementWrapper
 import javax.xml.bind.annotation.XmlRootElement
+import javax.xml.bind.annotation.XmlSchema
 
 import sen1.proxies.core.DataTypeEnum
 import sen1.proxies.core.io.Message
@@ -16,7 +17,7 @@ import sen1.proxies.core.io.MessageData
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-@XmlRootElement(name = "message")
+@XmlRootElement(name = "Sen1Message", namespace = "http://xmpp.rocks")
 @XmlAccessorType(XmlAccessType.FIELD)
 class DefaultMessage implements Message<DefaultMessageData> {
 	String username
@@ -27,8 +28,8 @@ class DefaultMessage implements Message<DefaultMessageData> {
 	DataTypeEnum type
 	String applicationSrc
 	String applicationDst
-	@XmlElementWrapper(name = "datas")
-	@XmlElement(name = "data")
+	@XmlElementWrapper(name = "Sen1Datas")
+	@XmlElement(name = "Sen1Data")
 	List<DefaultMessageData> datas = []
 
 
@@ -74,5 +75,19 @@ class DefaultMessage implements Message<DefaultMessageData> {
 	Message addData(DefaultMessageData data) {
 		datas << data
 		return this
+	}
+
+
+	/** (non-Javadoc)
+	 *
+	 * @see sen1.proxies.core.io.Message#asserts()
+	 */
+	@Override
+	void asserts() {
+		assert username != null
+		assert applicationSrc != null
+		assert applicationDst != null
+		assert type != null
+		assert name != null
 	}
 }

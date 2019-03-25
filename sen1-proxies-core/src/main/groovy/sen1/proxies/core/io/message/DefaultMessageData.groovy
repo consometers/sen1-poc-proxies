@@ -12,7 +12,7 @@ import sen1.proxies.core.io.MessageData
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
-@XmlRootElement(name = "data")
+@XmlRootElement(name = "Sen1Data", namespace = "http://xmpp.rocks")
 @XmlAccessorType(XmlAccessType.FIELD)
 class DefaultMessageData implements MessageData {
 	Object value

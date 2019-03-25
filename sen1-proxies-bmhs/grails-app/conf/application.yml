@@ -86,43 +86,76 @@ endpoints:
 hibernate:
     cache:
         queries: false
-        use_second_level_cache: false
-        use_query_cache: false
-dataSource:
-    pooled: true
-    jmxExport: true
-    driverClassName: org.h2.Driver
-    username: sa
-    password: ''
+        use_second_level_cache: true
+        use_query_cache: true
+        region:
+            factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
 
 environments:
     development:
         dataSource:
-            dbCreate: create-drop
-            url: jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+            formatSql: true
+            pooled: true
+            dbCreate: update
+            driverClassName: org.postgresql.Driver
+            url: jdbc:postgresql://localhost:5432/sen1-proxy-bmhs
+            username: postgres
+            password: 18fhk6vf4d
+            properties:
+                validationQuery: SELECT 1
+                maxActive: 5
+                logAbandoned: true
+                maxWait: 5000
     test:
         dataSource:
-            dbCreate: update
+            formatSql: true
+            pooled: true
+            driverClassName: org.h2.Driver
+            dbCreate: create-drop
             url: jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
     production:
         dataSource:
-            dbCreate: none
-            url: jdbc:h2:./prodDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
-            properties:
-                jmxEnabled: true
-                initialSize: 5
-                maxActive: 50
-                minIdle: 5
-                maxIdle: 25
-                maxWait: 10000
-                maxAge: 600000
-                timeBetweenEvictionRunsMillis: 5000
-                minEvictableIdleTimeMillis: 60000
-                validationQuery: SELECT 1
-                validationQueryTimeout: 3
-                validationInterval: 15000
-                testOnBorrow: true
-                testWhileIdle: true
-                testOnReturn: false
-                jdbcInterceptors: ConnectionState
-                defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
+            jndiName: java:comp/env/sen1ProxyBmhsDataSource
+                     
+---
+quartz:
+    scheduler:
+        instanceName: Sen1ProxyBmhsQuartzScheduler
+        instanceId: AUTO
+    threadPool:
+        class: org.quartz.simpl.SimpleThreadPool
+        threadCount: 2
+    jobStore:
+        isClustered: true
+        tablePrefix: quartz.QRTZ_
+        class: org.quartz.impl.jdbcjobstore.JobStoreTX
+        driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+        dataSource: sen1ProxyBmhsDataSource
+        clusterCheckinInterval: 20000
+
+environments:
+    development:
+        quartz:
+            dataSource:
+                sen1ProxyBmhsDataSource:
+                    driver: org.postgresql.Driver
+                    URL: jdbc:postgresql://localhost:5432/sen1-proxy-bmhs
+                    user: postgres
+                    password: 18fhk6vf4d
+                    maxConnections: 2
+    production:
+        quartz:
+            dataSource:
+                sen1ProxyBmhsDataSource:
+                    jndiURL: java:comp/env/sen1ProxyBmhsDataSource
+            scheduler:
+                skipUpdateCheck: true
+
+---
+sen1:
+    proxies:
+        bmhs:
+        core:
+            pagination:
+                maxView: 25
+                maxBackend: 100 

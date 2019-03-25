@@ -3,11 +3,10 @@ package sen1.proxies.core
 import org.springframework.beans.factory.annotation.Autowired
 
 import grails.gorm.transactions.Transactional
-import sen1.proxies.core.data.UserDataService
 import sen1.proxies.core.service.AbstractDataService
 
 /**
- * Service UserService
+ * Service UserAppService
  * 
  * Service métier pour la gestion des sen1.proxies.core.User
  * 
@@ -15,7 +14,7 @@ import sen1.proxies.core.service.AbstractDataService
  *
  */
 @Transactional(readOnly = true)
-class UserService extends AbstractDataService<User> {
+class UserAppService extends AbstractDataService<UserApp> {
 	/**
 	 * Service Data Délégué
 	 * Tous les appels aux méthodes non présentes dans ce service sont délégués au service data
@@ -25,12 +24,16 @@ class UserService extends AbstractDataService<User> {
 	//	UserDataService userDataService
 
 	/**
-	 * Recherche d'un user par son identifiant métier
+	 * Recherche unique par user et application
 	 * 
 	 * @param username
+	 * @param applicationName
 	 * @return
 	 */
-	User findByUsername(String username) {
-		return User.findByUsername(username)
+	UserApp findByUserAndApplication(String userName, String applicationName) {
+		return UserApp.createCriteria().get {
+			user { eq 'username', userName	 }
+			app { eq 'name', applicationName	 }
+		}
 	}
 }

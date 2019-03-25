@@ -14,11 +14,11 @@ class Consumer {
 	/**
 	 * Application dans le réseau fédéré à qui envoyer les données
 	 */
-	App app
+	App consumerApp
 	/**
-	 * Utilisateur des données
+	 * Utilisateur dans le système local
 	 */
-	User user
+	UserApp userApp
 	/**
 	 * Nom/identifiant de la donnée dans le système local
 	 */
@@ -49,7 +49,7 @@ class Consumer {
 	 * Domain Validation
 	 */
 	static constraints = {
-		user unique: [
+		userApp unique: [
 			'name',
 			'metaname',
 			'metavalue'

@@ -16,18 +16,24 @@ class User {
 	 * Identifiant unique
 	 */
 	String username
+
 	/**
-	 * Token de connexion au système local 
+	 * La liste des applications associées avec les identifiants
 	 */
-	String token
+	Set<UserApp> apps = []
+
+
+	/**
+	 * @ToMany associations
+	 */
+	static hasMany = [apps: UserApp]
 
 
 	/**
 	 * Domain Validation
 	 */
 	static constraints = {
-		username unique: true, nullable: false
-		token nullable: false
+		username unique: true, nullable: true
 	}
 
 
@@ -38,5 +44,6 @@ class User {
 		comment "User"
 		table schema: ProxyConstantes.DBSCHEMA
 		username index: 'User_Idx'
+		apps cascade: 'all-delete-orphan'
 	}
 }

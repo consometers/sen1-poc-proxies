@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 
+import grails.core.GrailsApplication
 import sen1.proxies.core.Inbox
 import sen1.proxies.core.InboxService
 import sen1.proxies.core.io.Message
@@ -37,6 +38,9 @@ class FetchInboxSubJob implements Job {
 	@Autowired
 	ProxyService proxyService
 
+	@Autowired
+	GrailsApplication grailsApplication
+
 
 	/** 
 	 * 1. charge une inbox
@@ -53,6 +57,16 @@ class FetchInboxSubJob implements Job {
 
 		// récupère le message enregistré et l'envoit sur le système local
 		Message message = messageSerializer.read(inbox.data)
+
+		// si le message n'est pas valide, il est supprimé
+		try {
+			message.asserts()
+		} catch (Exception e) {
+			log.error("Invalid message : ${e.message}")
+			inboxService.delete(inbox)
+			return
+		}
+
 		proxyService.pushData(message)
 
 		// si pas d'erreur à l'envoi, le message peut être supprimé

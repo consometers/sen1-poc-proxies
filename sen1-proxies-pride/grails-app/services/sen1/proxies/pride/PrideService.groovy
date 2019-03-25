@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 
 import grails.gorm.transactions.Transactional
+import groovy.time.TimeCategory
 import sen1.proxies.core.ConfigService
 import sen1.proxies.core.Consumer
 import sen1.proxies.core.io.Message
@@ -57,12 +58,17 @@ class PrideService extends AbstractService implements ProxyService<JSONArray> {
 		// le label de Warp10 devient notre name/identifiant de l'objet et le classname/selector sera envoyé dans
 		// notre sous-valeur metaname. Le metavalue ne nous sert qu'à préciser le label
 		Warp10FetchScript fetchScript = new Warp10FetchScript()
-				.token(consumer.user.token)
+				.token(consumer.userApp.token)
 				.selector("=${consumer.metaname}{${consumer.metavalue}=${consumer.name}}")
 
 		// soit cette donnée a déjà été lue, et on ne charge que les données plus récentes au dernier chargement
 		if (consumer.dateLastValue) {
-			fetchScript.start(consumer.dateLastValue).end(new Date())
+			// la dernière date correspond au timestamp d'un datapoint
+			// le champ start est inclusif, donc on doit décaler la date début d'au moins 1 second
+			// pour ne pas recharger 2x le même datapoint
+			use(TimeCategory) {
+				fetchScript.start(consumer.dateLastValue + 1.second).end(new Date())
+			}
 		} else {
 			// sinon on essaye de lire les MAX dernières valeurs
 			fetchScript.end(new Date()).count(firstMaxValue)

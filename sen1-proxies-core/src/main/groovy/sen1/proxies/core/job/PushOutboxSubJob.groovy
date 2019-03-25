@@ -56,7 +56,7 @@ class PushOutboxSubJob implements Job {
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		long consumerId = context.getJobDetail().getJobDataMap().getLong("consumerId")
-		Consumer consumer = consumerService.findByIdFetch(consumerId, 'user', 'app')
+		Consumer consumer = consumerService.findByIdFetchAll(consumerId)
 
 		// lecture des données depuis le système local
 		List datas = proxyService.fetchData(consumer)
@@ -65,10 +65,10 @@ class PushOutboxSubJob implements Job {
 			// créé un nouveau message complété avec les infos du consumer
 			// et le passe dans le converter pour remplir les données
 			Message message = MessageBuilder.builder()
-					// les infos pour le réseau
-					.username(consumer.user.username)
-					.applicationDst(consumer.app.name)
-					.applicationSrc(grailsApplication.config.info.app.name)
+					// les infos d'identification
+					.username(consumer.userApp.user.username)
+					.applicationDst(consumer.consumerApp.name)
+					.applicationSrc(consumer.userApp.app.name)
 					// les infos pour la donnée
 					.name(consumer.name)
 					.metaname(consumer.metaname)
@@ -80,6 +80,9 @@ class PushOutboxSubJob implements Job {
 			for (def data : datas) {
 				message.datas << outboxConverter.convert(message, data)
 			}
+
+			// on ne stocke que des messages valides
+			message.asserts()
 
 			// construit un élément dans la outbox serialisé à partir du message
 			// et sauvegarde en base

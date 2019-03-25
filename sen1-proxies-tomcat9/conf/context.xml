@@ -32,8 +32,8 @@
     <Resource name="sen1ProxyDataSource" auth="Container" type="javax.sql.DataSource"
     	factory="org.apache.tomcat.jdbc.pool.DataSourceFactory" driverClassName="org.postgresql.Driver"
     	url="jdbc:postgresql://#jdbc-host#:#jdbc-port#/#jdbc-database#" username="#jdbc-user#" password="#jdbc-password#" 
-		maxActive="15" maxIdle="5" maxWait="5000"
-		removeAbandoned="true" removeAbandonedTimeout="60" logAbandoned="true" testOnBorrow="true"
-		validationQuery="SELECT 1" validationInterval="30000" validationQueryTimeout="5">
-	</Resource>
+	maxActive="5" maxIdle="5" maxWait="5000"
+	removeAbandoned="true" removeAbandonedTimeout="60" logAbandoned="true" testOnBorrow="true"
+	validationQuery="SELECT 1" validationInterval="30000" validationQueryTimeout="5">
+    </Resource>
 </Context>

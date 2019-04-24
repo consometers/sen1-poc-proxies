@@ -1,3 +1,4 @@
 include "sen1-proxies-core"
 include "sen1-proxies-pride"
 include "sen1-proxies-bmhs"
+include "sen1-proxies-enedis"

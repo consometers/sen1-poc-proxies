@@ -49,7 +49,7 @@ class DataConnectV0 implements DataConnect {
 	AuthorizeResponse authorize(AuthorizeRequest request) throws Exception {
 		request.asserts()
 		AuthorizeResponse response
-		
+
 		return response.asserts()
 	}
 
@@ -64,13 +64,13 @@ class DataConnectV0 implements DataConnect {
 		request.asserts()
 		String url = "${URLS[Environment.getCurrentEnvironment()].token}/v1/oauth2/token"
 		TokenResponse response
-		
+
 		Http httpRequest = Http.Post(url)
 				.queryParam("redirect_uri", request.redirectUri)
 				.formField("client_id", request.clientId)
 				.formField("client_secret", request.clientSecret)
 				.formField("grant_type", request.grantType.toString())
-				
+
 		if (request.grantType == GrantTypeEnum.authorization_code) {
 			httpRequest.formField("code", request.code)
 		} else {
@@ -79,21 +79,23 @@ class DataConnectV0 implements DataConnect {
 
 		JSONElement result = httpRequest.execute(new JsonResponseTransformer())?.content
 
-		if (result) {
-			response = new TokenResponse()
-			response.accessToken = result.access_token
-			response.refreshToken = result.refresh_token
-			response.tokenType = result.token_type
-			response.expiresIn = result.expires_in as Long
-			response.scopes = result.scope
-			response.refreshTokenIssuedAt = result.refresh_token_issued_at
-			response.issuedAt = result.issued_at
+		if (!result) {
+			throw new Exception("Token response empty !")
 		}
+
+		response = new TokenResponse()
+		response.accessToken = result.access_token
+		response.refreshToken = result.refresh_token
+		response.tokenType = result.token_type
+		response.expiresIn = result.expires_in as Long
+		response.scopes = result.scope
+		response.refreshTokenIssuedAt = result.refresh_token_issued_at
+		response.issuedAt = result.issued_at
 
 		return response.asserts()
 	}
-	
-	
+
+
 	/**
 	 * 
 	 * @see sen1.proxies.enedis.api.DataConnect#consumptionLoadCurve(sen1.proxies.enedis.api.MetricRequest)
@@ -102,25 +104,28 @@ class DataConnectV0 implements DataConnect {
 	List<JSONElement> consumptionLoadCurve(MetricRequest request) throws Exception {
 		request.asserts()
 		String url = "${URLS[Environment.getCurrentEnvironment()].metric}/v3/metering_data/consumption_load_curve"
-		
+
 		JSONElement response = Http.Get(url)
-			.queryParam("start", DateUtils.formatDateTimeIso(request.start))
-			.queryParam("end", DateUtils.formatDateTimeIso(request.end))
-			.queryParam("usage_point_id", request.usagePointId)
-			.header("Authorization", "Bearer ${request.token}")
-			.header("Accept", "application/json")
-			.execute(new JsonResponseTransformer())?.content
-			
+				.queryParam("start", DateUtils.formatDateTimeIso(request.start))
+				.queryParam("end", DateUtils.formatDateTimeIso(request.end))
+				.queryParam("usage_point_id", request.usagePointId)
+				.header("Authorization", "Bearer ${request.token}")
+				.header("Accept", "application/json")
+				.execute(new JsonResponseTransformer())?.content
+
+		if (!response) {
+			throw new Exception("consumptionLoadCurve response empty !")
+		}
+
 		List<JSONElement> datapoints = response.usage_point[0].meter_reading.interval_reading
 		Date rankStart = DateUtils.parseDateUser(response.usage_point[0].meter_reading.start)
-		
+
 		datapoints.each {
 			use (TimeCategory) {
 				it.timestamp = rankStart + ((it.rank as Integer) * 30).minutes
 			}
 		}
-		
+
 		return datapoints
 	}
-	
 }

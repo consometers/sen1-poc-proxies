@@ -2,8 +2,10 @@ package sen1.proxies.core.http
 
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
+import org.apache.http.NameValuePair
 import org.apache.http.StatusLine
 import org.apache.http.client.ResponseHandler
+import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
@@ -16,6 +18,7 @@ import org.apache.http.entity.mime.FormBodyPartBuilder
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
+import org.apache.http.message.BasicNameValuePair
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -37,7 +40,7 @@ class Http {
 	URIBuilder uriBuilder
 	HttpRequestBase httpRequest
 	MultipartEntityBuilder entityBuilder
-	FormBodyPartBuilder formBuilder
+	List<NameValuePair> formParams = []
 
 
 	/**
@@ -87,21 +90,8 @@ class Http {
 		}
 		return entityBuilder
 	}
-
-
-	/**
-	 * Crée un singleton pour les formulaires
-	 *
-	 * @return
-	 */
-	private FormBodyPartBuilder formBuilder() {
-		if (! formBuilder) {
-			formBuilder = FormBodyPartBuilder.create()
-		}
-		return formBuilder
-	}
-
-
+	
+	
 	/**
 	 * Query param
 	 *
@@ -123,7 +113,7 @@ class Http {
 	 * @return
 	 */
 	Http formField(String name, String value) {
-		formBuilder().addField(name, value)
+		formParams << new BasicNameValuePair(name, value)
 		return this
 	}
 
@@ -198,13 +188,13 @@ class Http {
 		try {
 			httpRequest.setURI(uriBuilder.build())
 
-			if (formBuilder) {
-				entityBuilder().addPart(formBuilder.build())
-			}
-
-			if (entityBuilder) {
+			if (entityBuilder || formParams) {
 				if (httpRequest instanceof HttpEntityEnclosingRequestBase) {
-					(httpRequest as HttpEntityEnclosingRequestBase).setEntity(entityBuilder.build())
+					if (formParams) {
+						(httpRequest as HttpEntityEnclosingRequestBase).setEntity(new UrlEncodedFormEntity(formParams))
+					} else {
+						(httpRequest as HttpEntityEnclosingRequestBase).setEntity(entityBuilder.build())
+					}
 				} else {
 					throw new Exception("cannot set entity on simple HttpRequestBase !")
 				}

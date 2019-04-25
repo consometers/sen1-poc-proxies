@@ -6,12 +6,15 @@ package sen1.proxies.enedis.api.impl
 import org.grails.web.json.JSONElement
 
 import grails.util.Environment
+import groovy.time.TimeCategory
+import sen1.proxies.core.DateUtils
 import sen1.proxies.core.http.Http
 import sen1.proxies.core.http.transformer.JsonResponseTransformer
 import sen1.proxies.enedis.api.AuthorizeRequest
 import sen1.proxies.enedis.api.AuthorizeResponse
 import sen1.proxies.enedis.api.DataConnect
 import sen1.proxies.enedis.api.GrantTypeEnum
+import sen1.proxies.enedis.api.MetricRequest
 import sen1.proxies.enedis.api.TokenRequest
 import sen1.proxies.enedis.api.TokenResponse
 
@@ -26,11 +29,13 @@ class DataConnectV0 implements DataConnect {
 	private static final Map URLS = [
 		(Environment.DEVELOPMENT): [
 			authorize: "https://gw.hml.api.enedis.fr/group/espace-particuliers/consentement-linky",
-			token: "https://gw.hml.api.enedis.fr"
+			token: "https://gw.hml.api.enedis.fr",
+			metric: "https://gw.hml.api.enedis.fr"
 		],
 		(Environment.PRODUCTION): [
 			authorize: "https://espace-client-particuliers.enedis.fr/group/espace-particuliers/consentement-linky",
-			token: "https://gw.prd.api.enedis.fr"
+			token: "https://gw.prd.api.enedis.fr",
+			metric: "https://gw.prd.api.enedis.fr"
 		]
 	]
 
@@ -42,7 +47,10 @@ class DataConnectV0 implements DataConnect {
 	 */
 	@Override
 	AuthorizeResponse authorize(AuthorizeRequest request) throws Exception {
-		return null
+		request.asserts()
+		AuthorizeResponse response
+		
+		return response.asserts()
 	}
 
 
@@ -54,35 +62,65 @@ class DataConnectV0 implements DataConnect {
 	@Override
 	TokenResponse token(TokenRequest request) throws Exception {
 		request.asserts()
-
-		Http httpRequest = Http.Get("${URLS[Environment.getCurrentEnvironment()].token}/v1/oauth2/token")
+		String url = "${URLS[Environment.getCurrentEnvironment()].token}/v1/oauth2/token"
+		TokenResponse response
+		
+		Http httpRequest = Http.Post(url)
 				.queryParam("redirect_uri", request.redirectUri)
 				.formField("client_id", request.clientId)
 				.formField("client_secret", request.clientSecret)
 				.formField("grant_type", request.grantType.toString())
-
-		JSONElement result = httpRequest.execute(new JsonResponseTransformer())?.content
-		TokenResponse response
-
-		if (result) {
-			response = new TokenResponse(result)
+				
+		if (request.grantType == GrantTypeEnum.authorization_code) {
+			httpRequest.formField("code", request.code)
+		} else {
+			httpRequest.formField("refresh_token", request.refreshToken)
 		}
 
-		response.asserts()
+		JSONElement result = httpRequest.execute(new JsonResponseTransformer())?.content
 
-		return response
+		if (result) {
+			response = new TokenResponse()
+			response.accessToken = result.access_token
+			response.refreshToken = result.refresh_token
+			response.tokenType = result.token_type
+			response.expiresIn = result.expires_in as Long
+			response.scopes = result.scope
+			response.refreshTokenIssuedAt = result.refresh_token_issued_at
+			response.issuedAt = result.issued_at
+		}
+
+		return response.asserts()
 	}
-
-
-	static void main(String[] args) {
-		DataConnect api = new DataConnectV0()
-		TokenRequest request = new TokenRequest()
-		request.clientId = "4c11020c-b09b-4f90-ac8a-d72cea1a21c2"
-		request.clientSecret = "3e9cafae-84ff-48f3-8340-e04e17bd945e"
-		request.grantType = GrantTypeEnum.authorization_code
-		request.redirectUri = "https://www.jdevops.com/smarthome/application/oauth"
-		request.code = "vr213QcKD1y9yCtPXNwpJkdFgMy4pw"
-
-		TokenResponse response = api.token(request)
+	
+	
+	/**
+	 * 
+	 * @see sen1.proxies.enedis.api.DataConnect#consumptionLoadCurve(sen1.proxies.enedis.api.MetricRequest)
+	 */
+	@Override
+	List<JSONElement> consumptionLoadCurve(MetricRequest request) throws Exception {
+		request.asserts()
+		String url = "${URLS[Environment.getCurrentEnvironment()].metric}/v3/metering_data/consumption_load_curve"
+		
+		JSONElement response = Http.Get(url)
+			.queryParam("start", DateUtils.formatDateTimeIso(request.start))
+			.queryParam("end", DateUtils.formatDateTimeIso(request.end))
+			.queryParam("usage_point_id", request.usagePointId)
+			.header("Authorization", "Bearer ${request.token}")
+			.header("Accept", "application/json")
+			.execute(new JsonResponseTransformer())?.content
+			
+		List<JSONElement> datapoints = response.usage_point[0].meter_reading.interval_reading
+		Date rankStart = DateUtils.parseDateUser(response.usage_point[0].meter_reading.start)
+		
+		datapoints.each {
+			use (TimeCategory) {
+				it.timestamp = rankStart + ((it.rank as Integer) * 30).minutes
+			}
+		}
+		
+		return datapoints
 	}
+	
 }

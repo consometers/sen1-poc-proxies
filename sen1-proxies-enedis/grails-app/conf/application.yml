@@ -155,6 +155,8 @@ environments:
 sen1:
     proxies:
         enedis:
+            dataconnect:
+                maxMonthPeriod: 4
         core:
             pagination:
                 maxView: 25

@@ -1,5 +1,7 @@
 package sen1.proxies.enedis.api
 
+import org.grails.web.json.JSONElement
+
 /**
  * API DataConnect
  * 
@@ -47,4 +49,13 @@ interface DataConnect {
 	 * @throws Exception
 	 */
 	TokenResponse token(TokenRequest request) throws Exception
+	
+	
+	/**
+	 * Récupération de la puissance moyenne consommée quotidiennement,
+	 * par tranche d'une demi-heure.
+	 * 
+	 * @throws Exception
+	 */
+	List<JSONElement> consumptionLoadCurve(MetricRequest request) throws Exception
 }

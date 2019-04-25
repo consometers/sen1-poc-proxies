@@ -21,7 +21,7 @@ class TokenRequest {
 	 * 
 	 * @throws Exception
 	 */
-	void asserts() {
+	TokenRequest asserts() {
 		assert StringUtils.isNotEmpty(redirectUri)
 		assert StringUtils.isNotEmpty(clientId)
 		assert StringUtils.isNotEmpty(clientSecret)
@@ -32,5 +32,7 @@ class TokenRequest {
 		} else if (grantType == GrantTypeEnum.refresh_token) {
 			assert StringUtils.isNotEmpty(refreshToken)
 		}
+		
+		return this
 	}
 }

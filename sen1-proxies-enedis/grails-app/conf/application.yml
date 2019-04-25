@@ -89,8 +89,8 @@ hibernate:
         use_second_level_cache: true
         use_query_cache: true
         region:
-            factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactor
-            
+            factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
+
 environments:
     development:
         dataSource:
@@ -154,6 +154,7 @@ environments:
 ---
 sen1:
     proxies:
+        enedis:
         core:
             pagination:
                 maxView: 25

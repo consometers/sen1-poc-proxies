@@ -15,4 +15,13 @@ class TokenResponse {
 	List<String> scopes = []
 	Date issuedAt
 	Date refreshTokenIssuedAt
+
+
+	/**
+	 * Vérification response
+	 *
+	 * @throws Exception
+	 */
+	void asserts() {
+	}
 }

@@ -49,12 +49,30 @@ interface DataConnect {
 	 * @throws Exception
 	 */
 	TokenResponse token(TokenRequest request) throws Exception
-	
-	
+
+
 	/**
-	 * Récupération de la puissance moyenne consommée quotidiennement,
-	 * par tranche d'une demi-heure.
+	 * Récupération de la puissance moyenne consommée quotidiennement, par
+	 * tranche d'une demi-heure.
 	 * 
+	 * Doc :
+	 * Cette sous ressource renvoie les valeurs correspondant à des journées de
+	 * mesure de la courbe de charge de consommation d’un client pour chaque
+	 * jour de la période demandée. Les valeurs retournées sont des puissances
+	 * moyennes de consommation sur des tranches de 30 minutes. Chaque valeur
+	 * est associée à un numéro, la valeur portant le numéro 1 correspond à la
+	 * puissance moyenne mesurée entre minuit et minuit trente le premier jour
+	 * de la période demandée. La valeur portant le numéro le plus élevé
+	 * correspond à la puissance moyenne mesurée entre 23h30 et minuit, la
+	 * veille du dernier jour demandé. Les éventuelles périodes de données
+	 * absentes se manifesteront par un saut dans la numérotation. La courbe de
+	 * charge s’obtient sur des journées complètes de minuit à minuit du jour
+	 * suivant en heures locales. Un appel peut porter au maximum sur 7 jours
+	 * consécutifs. Un appel peut porter sur des données datant au maximum de
+	 * 24 mois et 15 jours avant la date d’appel.
+	 * 
+	 * @param request
+	 * @return
 	 * @throws Exception
 	 */
 	List<JSONElement> consumptionLoadCurve(MetricRequest request) throws Exception

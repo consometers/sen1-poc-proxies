@@ -20,7 +20,11 @@ class JsonResponseTransformer implements ResponseTransformer<JSONElement> {
 	@Override
 	JSONElement transform(InputStream inputStream) throws Exception {
 		if (inputStream) {
-			return JSON.parse(inputStream.text)
+			String content = inputStream.text
+
+			if (content) {
+				return JSON.parse(content)
+			}
 		}
 
 		return null

@@ -12,8 +12,9 @@ beans = {
 	// seconde | minute | heure | jour du mois (1-31) | mois | jour semaine (1-7) | année
 	defaultScheduler(sen1.proxies.core.scheduler.DefaultScheduler) {
 		jobs = [
-			// Fetch les données Enedis des compteurs référencés dans le proxy (toutes les 5 min)
-			'sen1.proxies.core.job.PushOutboxMainJob' : '0 0/5 * * * ?',
+			// Fetch les données Enedis des compteurs référencés dans le proxy
+			// 1 fois par jour car les données sont remontées pour une journée entière
+			'sen1.proxies.core.job.PushOutboxMainJob' : '0 0 1 * * ?',
 			// Fetch les données de la outbox et les envoit sur le réseau fédéré (toutes les 5 min)
 			'sen1.proxies.core.job.FetchOutboxMainJob': '0 0/5 * * * ?'
 		]

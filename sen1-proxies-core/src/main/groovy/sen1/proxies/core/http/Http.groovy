@@ -90,8 +90,8 @@ class Http {
 		}
 		return entityBuilder
 	}
-	
-	
+
+
 	/**
 	 * Query param
 	 *

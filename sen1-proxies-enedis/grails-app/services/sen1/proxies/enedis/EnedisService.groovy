@@ -22,9 +22,7 @@ import sen1.proxies.enedis.api.MetricRequest
  *
  */
 @Transactional(readOnly = true)
-class PrideService extends AbstractService implements ProxyService<JSONElement> {
-
-	private static final PROXY_URL_CONFIG = "PROXY_URL"
+class EnedisService extends AbstractService implements ProxyService<JSONElement> {
 
 	/**
 	 * Instance DataConnect injectée par Spring
@@ -33,15 +31,12 @@ class PrideService extends AbstractService implements ProxyService<JSONElement> 
 	@Autowired
 	DataConnect dataConnect
 
-	@Autowired
-	ConfigService configService
-
 	/**
 	 * Injecté depuis les properties
 	 * @see application.yml
 	 */
-	@Value('${sen1.proxies.enedis.dataconnect.maxMonthPeriod}')
-	int maxMonthPeriod
+	@Value('${sen1.proxies.enedis.dataconnect.maxDayPeriod}')
+	int maxDayPeriod
 
 
 	/** 
@@ -54,22 +49,23 @@ class PrideService extends AbstractService implements ProxyService<JSONElement> 
 	@Override
 	List<JSONElement> fetchData(Consumer consumer) throws Exception {
 		MetricRequest metricRequest = new MetricRequest()
-		
+
 		metricRequest.token = consumer.userApp.token
 		metricRequest.end = new Date().clearTime()
 		metricRequest.usagePointId = consumer.name
-		
+
 		use(TimeCategory) {
 			if (consumer.dateLastValue) {
 				// les données sont envoyées sur une journée complète
 				// donc il faut passer à la journée suivante
 				metricRequest.start = consumer.dateLastValue + 1.day
 			} else {
-				// si aucune donnée, on essaye de remonter les derniers mois
-				metricRequest.start = metricRequest.end - 7.days
+				// si aucune donnée, on essaye de remonter les X derniers jours
+				// @see https://datahub-enedis.fr/data-connect/documentation/metering-data/
+				metricRequest.start = metricRequest.end - maxDayPeriod.days
 			}
 		}
-		
+
 		return dataConnect.consumptionLoadCurve(metricRequest)
 	}
 

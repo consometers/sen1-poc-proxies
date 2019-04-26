@@ -113,16 +113,18 @@ class DataConnectV0 implements DataConnect {
 				.header("Accept", "application/json")
 				.execute(new JsonResponseTransformer())?.content
 
-		if (!response) {
+		if (!response || !response.usage_point) {
 			throw new Exception("consumptionLoadCurve response empty !")
 		}
 
 		List<JSONElement> datapoints = response.usage_point[0].meter_reading.interval_reading
-		Date rankStart = DateUtils.parseDateUser(response.usage_point[0].meter_reading.start)
+		Date rankStart = DateUtils.parseDateIso(response.usage_point[0].meter_reading.start)
 
-		datapoints.each {
+		datapoints.each { datapoint ->
 			use (TimeCategory) {
-				it.timestamp = rankStart + ((it.rank as Integer) * 30).minutes
+				// le rank correspond aux intervalles d'une 1/2H
+				// il faut retrancher 1 minute pour ne pas tomber sur la tranche suivante
+				datapoint.timestamp = rankStart + ((datapoint.rank as Integer) * 30).minutes - 1.minute
 			}
 		}
 

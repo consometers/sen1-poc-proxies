@@ -1,4 +1,4 @@
-package sen1.proxy.bmhs
+package sen1.proxies.bmhs
 
 import org.grails.web.json.JSONArray
 import org.springframework.beans.factory.annotation.Autowired

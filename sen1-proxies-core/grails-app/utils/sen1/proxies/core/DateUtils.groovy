@@ -34,8 +34,8 @@ class DateUtils {
 	static String formatDateIso(Date date) {
 		return date?.format(FORMAT_DATE_ISO)
 	}
-	
-	
+
+
 	/**
 	 * Parse date user
 	 *
@@ -44,5 +44,16 @@ class DateUtils {
 	 */
 	static Date parseDateUser(String user) {
 		return new SimpleDateFormat(FORMAT_DATE_USER).parse(user)
+	}
+
+
+	/**
+	 * Parse date ISO
+	 *
+	 * @param date
+	 * @return
+	 */
+	static Date parseDateIso(String iso) {
+		return new SimpleDateFormat(FORMAT_DATE_ISO).parse(iso)
 	}
 }

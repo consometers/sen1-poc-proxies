@@ -156,7 +156,7 @@ sen1:
     proxies:
         enedis:
             dataconnect:
-                maxMonthPeriod: 4
+                maxDayPeriod: 7
         core:
             pagination:
                 maxView: 25

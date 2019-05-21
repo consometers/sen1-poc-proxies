@@ -6,8 +6,10 @@ Module application
 Contexte applicatif
 Déclare les objets de l'application et les créé dynamiquement à la demande
 Gère aussi la configuration globale du projet
+Ceci permet aussi des dépendances cycliques entre module car les modules sont
+importées dynamiquement
 
-@author: Gregory
+@author: Gregory Elléouet
 '''
 
 from importlib import import_module
@@ -84,14 +86,23 @@ class ApplicationContext(object):
 beans = {
     "proxy": {
         "class": "proxieslognact.proxy.Proxy",
-        "pushoutboxjob": "bean:pushoutboxjob"
+        "pushoutboxjob": "bean:pushoutboxjob",
+        "config": "bean:config"
     },
     "lognact": {
-        "class": "proxieslognact.api.zabbix.Zabbix"
+        "class": "proxieslognact.api.zabbix.Zabbix",
     },
     "pushoutboxjob": {
         "class": "proxieslognact.job.pushoutbox.PushOutboxJob",
-        "lognact": "bean:lognact"
+        "lognact": "bean:lognact",
+        "config": "bean:config"
+    },
+    "config": {
+        "class": "proxieslognact.util.config.Config",
+        "datasource": "bean:datasource"
+    },
+    "datasource": {
+        "class": "proxieslognact.util.datasource.Datasource",
     }
 }
 
@@ -101,7 +112,7 @@ beans = {
 # ------------------------------------------------------------------------------
 
 settings = {
-
+    
 }
 
 

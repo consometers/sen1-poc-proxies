@@ -21,7 +21,9 @@ setup(
     install_requires = [
         'schedule',
         'requests',
-        'py-zabbix'
+        'pyzabbix',
+        'sqlalchemy',
+        'psycopg2'
     ],
     entry_points = {
         "console_scripts": [

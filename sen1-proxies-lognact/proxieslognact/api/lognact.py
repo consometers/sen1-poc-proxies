@@ -46,7 +46,7 @@ class LogNAct(ABC):
     
     
     @abstractmethod
-    def get_data(self, command):
+    def fetch_data(self, command):
         """
         Récupère des données depuis le serveur
         :param command: objet de type GetData
@@ -61,7 +61,7 @@ class PushData(object):
     Paramètres de commande pour l'appel push_data
     """
     
-    def __init__(self, params):
+    def __init__(self):
         pass
     
     
@@ -69,7 +69,27 @@ class PushData(object):
 class GetData(object):
     """
     Paramètres de commande pour l'appel get_data
+    Api Fluent
     """
     
-    def __init__(self, params):
+    def __init__(self):
+        self.serverUrl = None
+        self.token = None
         pass
+    
+    
+    def serverUrl(self, serverUrl):
+        """
+        Injecte l'URL du serveur
+        """
+        self.serverUrl = serverUrl
+        return self
+    
+    
+    def token(self, token):
+        """
+        Injecte le token de connexion
+        """
+        self.token = token
+        return self
+    

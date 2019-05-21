@@ -4,6 +4,9 @@ Module pushoutbox
 @author: Gregory Elleouet
 """
 
+from proxieslognact.api.lognact import GetData
+
+
 class PushOutboxJob(object):
     """
     Job pour charger les données du système local (lognact) et les envoyer sur
@@ -15,6 +18,7 @@ class PushOutboxJob(object):
         Constructor
         """
         self.lognact = None
+        self.config = None
         
         
     def execute(self, scheduler):
@@ -23,5 +27,12 @@ class PushOutboxJob(object):
         Charge tous les consumers associés à un objet et prépare un message pour
         chacun d'eux à envoyer sur la boite "outbox"
         """
-        print("Execute PushOutboxJob")
+        print("Running PushOutboxJob...")
+        
+        # construit un objet pour requêter les données
+        command = GetData().\
+            serverUrl(self.config.value("LOGNACT_URL"))
+            
+        self.lognact.fetch_data(command)
+        
         

@@ -29,7 +29,7 @@ class Zabbix(LogNAct):
         pass
     
     
-    def get_data(self, command):
+    def fetch_data(self, command):
         """
         Récupère des données depuis le serveur
         """

@@ -30,6 +30,7 @@ class Proxy(object):
         '''
         self.suspended = False
         self.pushoutboxjob = None
+        self.config = None
     
     
     def _exit_handler(self, signum, flag):
@@ -48,6 +49,7 @@ class Proxy(object):
         
         # Exécution du job pushoutbox toutes les 5 minutes
         schedule.every(1).minutes.do(self.pushoutboxjob.execute, schedule)
+
     
     
     def stop(self):

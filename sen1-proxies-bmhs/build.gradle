@@ -73,6 +73,7 @@ bootRun {
     addResources = true
     String springProfilesActive = 'spring.profiles.active'
     systemProperty springProfilesActive, System.getProperty(springProfilesActive)
+    systemProperty springProfilesActive, System.getProperty(springProfilesActive)
 }
 
 tasks.withType(Test) {

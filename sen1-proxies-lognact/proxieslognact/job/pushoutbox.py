@@ -21,18 +21,19 @@ class PushOutboxJob(object):
         self.config = None
         
         
+    
     def execute(self, scheduler):
         """
         Exécute le job depuis un scheduler
         Charge tous les consumers associés à un objet et prépare un message pour
         chacun d'eux à envoyer sur la boite "outbox"
         """
-        print("Running PushOutboxJob...")
+        self.logger.info("Running PushOutboxJob...")
         
         # construit un objet pour requêter les données
-        command = GetData().\
-            serverUrl(self.config.value("LOGNACT_URL"))
+        command = GetData()\
+            .serverUrl(self.config.value("LOGNACT_URL"))\
+            .user(self.config.value("LOGNACT_USER"))\
+            .password(self.config.value("LOGNACT_PASSWORD"))
             
-        self.lognact.fetch_data(command)
-        
-        
+        datas = self.lognact.fetch_data(command)

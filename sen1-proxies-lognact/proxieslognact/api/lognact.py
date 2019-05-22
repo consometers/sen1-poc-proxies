@@ -21,20 +21,10 @@ class LogNAct(ABC):
         '''
         Constructor
         '''
-        self.host = None
+        pass
     
     
-    def host(self, host):
-        """
-        Associe le host du serveur et renvoit une référence à l'instance
-        pour une utilisation Fluent
-        :param host
-        :return self
-        """
-        self.host = host
-        return self
-      
-        
+    
     @abstractmethod
     def push_data(self, command):
         """
@@ -43,6 +33,7 @@ class LogNAct(ABC):
         :return
         """
         pass
+    
     
     
     @abstractmethod
@@ -73,23 +64,59 @@ class GetData(object):
     """
     
     def __init__(self):
-        self.serverUrl = None
-        self.token = None
-        pass
+        self._serverUrl = None
+        self._user = None
+        self._password = None
+        self._dateStart = None
+        self._dateEnd = None
+        self._itemIds = None
     
     
     def serverUrl(self, serverUrl):
         """
         Injecte l'URL du serveur
         """
-        self.serverUrl = serverUrl
+        self._serverUrl = serverUrl
         return self
     
     
-    def token(self, token):
+    def user(self, user):
         """
-        Injecte le token de connexion
+        Injecte l'identifiant de connexion
         """
-        self.token = token
+        self._user = user
+        return self
+    
+    
+    def password(self, password):
+        """
+        Injecte le mot de passe de connexion
+        """
+        self._password = password
+        return self
+    
+    
+    def dateStart(self, dateStart):
+        """
+        Date début historique (inclusif)
+        """
+        self._dateStart = dateStart
+        return self
+    
+    
+    def dateEnd(self, dateEnd):
+        """
+        Date fin historique (inclusif)
+        """
+        self._dateEnd = dateEnd
+        return self
+    
+    
+    def itemIds(self, itemIds):
+        """
+        Les items à recherche.
+        Peut-être une simple valeur ou un tableau de valeur
+        """
+        self._itemIds = itemIds
         return self
     

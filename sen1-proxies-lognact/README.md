@@ -7,7 +7,9 @@ Installation (depuis le dossier du projet) d'un script d'exécution
 > python setup.py install
 
 Exécution du programme
-> lognact
+> lognact  
+ou  
+> python -m proxieslognact.proxy
 
 Prérequis runtime
 * créer les variables d'environnement : 

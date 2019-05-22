@@ -5,6 +5,7 @@ Module config
 """
 
 from proxieslognact.model.configvalue import ConfigValue
+from proxieslognact.util.datasource import transactional
 
 
 class Config(object):
@@ -19,21 +20,23 @@ class Config(object):
         '''
         Constructor
         '''
-        self.datasource = None
+        pass
     
     
-    def value(self, name):
+    @transactional()
+    def value(self, name, session=None):
         """
         Change une config par son nom
+        @param name: le nom de la config à retrouver
+        @param session: auto injecté par le decorator transactionel. L'argument
+        est optionnel pour le masquer du code appelant
         """
-        configValue = None
-        
-        with self.datasource.with_session() as session:
-            configValue = session.query(ConfigValue).\
-                filter(ConfigValue.name == name).one().value
+        configValue = session.query(ConfigValue).\
+                filter(ConfigValue.name == name).\
+                one()
         
         # si aucne value, le one() a déclenchée une exception
         # donc le return renvoit forcément quelquechose
-        return configValue
+        return configValue.value
         
         

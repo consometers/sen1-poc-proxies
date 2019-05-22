@@ -13,6 +13,7 @@ importées dynamiquement
 '''
 
 from importlib import import_module
+import logging
 
 
 class ApplicationContext(object):
@@ -47,6 +48,7 @@ class ApplicationContext(object):
                         setattr(bean, key, value)
             
         
+        
     def bean(self, name):
         """
         Récupère un bean dans le contexte
@@ -69,9 +71,11 @@ class ApplicationContext(object):
             
             # instancie le bean avec la classe trouvée
             # et le conserve dans la map des instances
+            # inject aussi auto un logger
             bean = beanClass()
             self._set_attrs(bean, beanDict)
             self.instances[name] = bean
+            bean.logger = logging.getLogger(beanDict["class"])
         else:
             bean = self.instances[name]
         
@@ -87,7 +91,6 @@ beans = {
     "proxy": {
         "class": "proxieslognact.proxy.Proxy",
         "pushoutboxjob": "bean:pushoutboxjob",
-        "config": "bean:config"
     },
     "lognact": {
         "class": "proxieslognact.api.zabbix.Zabbix",
@@ -98,11 +101,10 @@ beans = {
         "config": "bean:config"
     },
     "config": {
-        "class": "proxieslognact.util.config.Config",
-        "datasource": "bean:datasource"
+        "class": "proxieslognact.service.config.Config"
     },
     "datasource": {
-        "class": "proxieslognact.util.datasource.Datasource",
+        "class": "proxieslognact.util.datasource.Datasource"
     }
 }
 

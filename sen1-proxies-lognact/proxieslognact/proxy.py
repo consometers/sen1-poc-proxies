@@ -10,7 +10,7 @@ import time
 import signal
 import sys
 import schedule
-from application import applicationContext
+from proxieslognact.application import applicationContext
 
 
 __all__ = ['Proxy', 'main']
@@ -30,7 +30,7 @@ class Proxy(object):
         '''
         self.suspended = False
         self.pushoutboxjob = None
-        self.config = None
+    
     
     
     def _exit_handler(self, signum, flag):
@@ -41,6 +41,7 @@ class Proxy(object):
         self.suspended = True
         
     
+    
     def start(self):
         """
         Démarrage du proxy
@@ -48,7 +49,8 @@ class Proxy(object):
         print("Starting proxy server...")
         
         # Exécution du job pushoutbox toutes les 5 minutes
-        schedule.every(1).minutes.do(self.pushoutboxjob.execute, schedule)
+        #schedule.every(1).minutes.do(self.pushoutboxjob.execute, schedule)
+        self.pushoutboxjob.execute(None)
 
     
     
@@ -57,6 +59,7 @@ class Proxy(object):
         Arrête le proxy
         """
         print("Stopping proxy server...")
+        
         
         
     def run(self):
@@ -82,12 +85,14 @@ class Proxy(object):
         sys.exit(0)
         
 
+
 def main():
     """
     Entrypoint : démarre un sever proxy
     """
     proxy = applicationContext.bean("proxy")
     proxy.run()
+    
     
     
 # exécution autoname

@@ -10,6 +10,7 @@ import time
 import signal
 import sys
 import schedule
+
 from proxieslognact.application import applicationContext
 
 
@@ -37,7 +38,7 @@ class Proxy(object):
         """
         Handler pour l'arrêt "propre" du serveur
         """
-        print(f"Handle exit signal : {signum}")
+        self.logger.info(f"Handle exit signal : {signum}")
         self.suspended = True
         
     
@@ -46,7 +47,7 @@ class Proxy(object):
         """
         Démarrage du proxy
         """
-        print("Starting proxy server...")
+        self.logger.info(f"Starting proxy server... [{applicationContext.environnement}]")
         
         # Exécution du job pushoutbox toutes les 5 minutes
         #schedule.every(1).minutes.do(self.pushoutboxjob.execute, schedule)
@@ -58,7 +59,7 @@ class Proxy(object):
         """
         Arrête le proxy
         """
-        print("Stopping proxy server...")
+        self.logger.info("Stopping proxy server...")
         
         
         
@@ -74,8 +75,6 @@ class Proxy(object):
          # intercepte les signaux d'arrêt du process
         signal.signal(signal.SIGTERM, self._exit_handler)
         signal.signal(signal.SIGINT, self._exit_handler)
-        
-        print("Listening proxy server...")
         
         while not self.suspended:
             schedule.run_pending()

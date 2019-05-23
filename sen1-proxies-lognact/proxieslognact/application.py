@@ -12,8 +12,12 @@ importées dynamiquement
 @author: Gregory Elléouet
 '''
 
-from importlib import import_module
+import os
 import logging
+from importlib import import_module
+
+
+__all__ = ['ApplicationContext', 'applicationContext']
 
 
 class ApplicationContext(object):
@@ -21,13 +25,19 @@ class ApplicationContext(object):
     Contexte applicatif
     Instancie les beans à la demande à partir du dictionnaire beans
     """
-    def __init__(self, beans, settings):
+    def __init__(self):
         """
         Constructor
         """
-        self.beans = beans
-        self.settings = settings
         self.instances = {}
+        
+        if "PROXY_ENV" in os.environ:
+            self.environnement = os.environ["PROXY_ENV"]
+    
+            if (not self.environnement in ["dev", "prod"]):
+                raise RuntimeError(f"'{self.environnement}' environnement not recognized !")
+        else:
+            self.environnement = "prod"
         
     
     def _set_attrs(self, bean, attrs):
@@ -60,7 +70,7 @@ class ApplicationContext(object):
         # l'objet n'a pas encore été instancié, on le créé à la demande   
         # s'il existe dans le dictionnaire     
         if not name in self.instances:
-            beanDict = self.beans[name]
+            beanDict = beans[name]
             
             if beanDict == None:
                 raise RuntimeError(f"bean {name} is not declared !")
@@ -71,17 +81,17 @@ class ApplicationContext(object):
             
             # instancie le bean avec la classe trouvée
             # et le conserve dans la map des instances
-            # inject aussi auto un logger
+            # inject aussi auto un logger configuré sur le nom du module
             bean = beanClass()
             self._set_attrs(bean, beanDict)
             self.instances[name] = bean
-            bean.logger = logging.getLogger(beanDict["class"])
+            bean.logger = logging.getLogger(module.__name__)
         else:
             bean = self.instances[name]
         
         return bean
     
-    
+
 
 # ------------------------------------------------------------------------------
 # beans : dictionnaire des beans de l'application    
@@ -98,10 +108,10 @@ beans = {
     "pushoutboxjob": {
         "class": "proxieslognact.job.pushoutbox.PushOutboxJob",
         "lognact": "bean:lognact",
-        "config": "bean:config"
+        "configService": "bean:configService"
     },
-    "config": {
-        "class": "proxieslognact.service.config.Config"
+    "configService": {
+        "class": "proxieslognact.service.config.ConfigService"
     },
     "datasource": {
         "class": "proxieslognact.util.datasource.Datasource"
@@ -109,14 +119,6 @@ beans = {
 }
 
 
-# ------------------------------------------------------------------------------
-# settings : dictionnaire config du projet
-# ------------------------------------------------------------------------------
-
-settings = {
-    
-}
-
 
 # le conteneur principal de l'application
-applicationContext = ApplicationContext(beans, settings)
+applicationContext = ApplicationContext()

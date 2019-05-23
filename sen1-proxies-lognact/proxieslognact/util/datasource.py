@@ -4,10 +4,13 @@ Module datasource
 @author: Gregory Elléouet
 """
 
+import os
+import logging
+
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
-import os
+
 from proxieslognact.application import applicationContext
 
 
@@ -29,12 +32,23 @@ class Datasource(object):
         if not "DATASOURCE_URL" in os.environ:
             raise RuntimeError("Environment DATASOURCE_URL is required !")
         
-        print(f"Use SQLAlchemy {sqlalchemy.__version__}")
-        
-        self.engine = sqlalchemy.create_engine(os.environ["DATASOURCE_URL"], echo=True)
-        self.sessionFactory = sessionmaker(bind=self.engine)
-        self.threadLocalSessionFactory = scoped_session(self.sessionFactory)
-        
+    
+    def _init_datasource(self):
+        """
+        Prépare le datasource après que toutes les propriétés soient injectées
+        A ne faire qu'une fois pour démarrerle Engine
+        """
+        if (self.engine == None):
+            showSql = False
+            
+            if (logging.getLogger("sqlachemy.sql") and logging.getLogger("sqlachemy.sql").level == logging.DEBUG):
+                showSql = True
+                
+            self.logger.info(f"Start SQLAlchemy {sqlalchemy.__version__} engine...")
+            self.engine = sqlalchemy.create_engine(os.environ["DATASOURCE_URL"],
+                                                   echo = showSql)
+            self.sessionFactory = sessionmaker(bind=self.engine)
+            self.threadLocalSessionFactory = scoped_session(self.sessionFactory)
         
         
     def __del__(self):
@@ -43,9 +57,8 @@ class Datasource(object):
         Libère la connexion
         """
         if (self.engine != None):
-            print("Closing datasource...")
+            self.logger.info("Closing datasource...")
             #self.engine.dispose()
-            
     
     
     def currentSession(self):
@@ -53,6 +66,7 @@ class Datasource(object):
         Récupère la session courante dans le thread loca. Si aucune session
         existe, une nouvelle est créé
         """
+        self._init_datasource()
         return self.threadLocalSessionFactory()
     
     

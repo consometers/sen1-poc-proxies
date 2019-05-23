@@ -14,4 +14,5 @@ ou
 Prérequis runtime
 * créer les variables d'environnement : 
     * DATASOURCE_URL (ex : postgresql://user:password@host:port/database)
+    * PROXY_ENV : [dev, prod (défaut)] permet d'ajuster les loggers et d'autres paramètres en fonction environnement d'exécution
 

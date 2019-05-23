@@ -4,7 +4,8 @@ Module pushoutbox
 @author: Gregory Elleouet
 """
 
-from proxieslognact.api.lognact import GetData
+from proxieslognact.api.lognact import FetchData
+from proxieslognact.util.builder import Builder
 
 
 class PushOutboxJob(object):
@@ -18,8 +19,7 @@ class PushOutboxJob(object):
         Constructor
         """
         self.lognact = None
-        self.config = None
-        
+        self.configService = None
         
     
     def execute(self, scheduler):
@@ -31,9 +31,10 @@ class PushOutboxJob(object):
         self.logger.info("Running PushOutboxJob...")
         
         # construit un objet pour requêter les données
-        command = GetData()\
-            .serverUrl(self.config.value("LOGNACT_URL"))\
-            .user(self.config.value("LOGNACT_USER"))\
-            .password(self.config.value("LOGNACT_PASSWORD"))
+        command = Builder(FetchData) \
+            .serverUrl(self.configService.value("LOGNACT_URL")) \
+            .user(self.configService.value("LOGNACT_USER")) \
+            .password(self.configService.value("LOGNACT_PASSWORD")) \
+            .build()
             
         datas = self.lognact.fetch_data(command)

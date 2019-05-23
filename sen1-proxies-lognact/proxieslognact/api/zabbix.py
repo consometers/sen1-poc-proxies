@@ -3,12 +3,10 @@
 @author: Gregory
 """
 
+from pyzabbix import ZabbixAPI, ZabbixAPIException
+from requests.exceptions import ReadTimeout
+
 from proxieslognact.api.lognact import LogNAct
-from pyzabbix import ZabbixAPI
-from pyzabbix.api import ZabbixAPIException
-
-
-_all__ = ['Zabbix']
 
 
 class Zabbix(LogNAct):
@@ -37,20 +35,24 @@ class Zabbix(LogNAct):
         spécifiés en paramètre
         @param command: critère de sélection et connexion
         """
-        self.logger.info(f"Try connecting to {command._serverUrl}...")
-        zapi = ZabbixAPI(command._serverUrl)
+        zapi = ZabbixAPI(server = command.serverUrl, timeout = 2.5)
         datas = None
         
         try:
-            zapi.login(command._user, command._password)
+            zapi.login(command.user, command.password)
+            self.logger.info(f"Try connecting to {command.serverUrl}... Zabbix{zapi.api_version()}...")
+        except (ZabbixAPIException, ReadTimeout, ValueError) as ex:
+            self.logger.error(f"Try connecting to {command.serverUrl} : {ex}")
             
-            datas = zapi.history.get(itemids = command._itemIds,
-                           time_from = command._dateStart,
-                           time_till = command._dateEnd,
+        try:
+            datas = zapi.history.get(itemids = command.itemIds,
+                           time_from = command.dateStart,
+                           time_till = command.dateEnd,
                            output = 'extend',
                            sortfield = 'clock')
-        except ZabbixAPIException as ex:
-            self.logger.error(ex)
+            self.logger.info(f"Fetching history from {command.dateStart} to {command.dateEnd}...{len(datas)}value(s)")
+        except (ZabbixAPIException, ReadTimeout, ValueError) as ex:
+            self.logger.error(f"Fetching history from {command.dateStart} to {command.dateEnd} : {ex}")
         
         return datas
         

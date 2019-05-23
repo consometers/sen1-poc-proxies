@@ -4,11 +4,11 @@ Module config
 @author: Gregory Elléouet
 """
 
-from proxieslognact.model.configvalue import ConfigValue
+from proxieslognact.model.config import Config
 from proxieslognact.util.datasource import transactional
 
 
-class Config(object):
+class ConfigService(object):
     """
     Charge les éléments de configuration depuis une base pour être injecté
     dans d'autres objets
@@ -31,12 +31,12 @@ class Config(object):
         @param session: auto injecté par le decorator transactionel. L'argument
         est optionnel pour le masquer du code appelant
         """
-        configValue = session.query(ConfigValue).\
-                filter(ConfigValue.name == name).\
+        config = session.query(Config).\
+                filter(Config.name == name).\
                 one()
         
         # si aucne value, le one() a déclenchée une exception
         # donc le return renvoit forcément quelquechose
-        return configValue.value
+        return config.value
         
         

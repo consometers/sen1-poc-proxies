@@ -1,5 +1,5 @@
 '''
-Module ConfigValue
+Module app
 
 @author: Gregory Elléouet
 '''
@@ -11,10 +11,13 @@ from sqlalchemy import Column, Integer, String
 Base = declarative_base()
 
 
-class ConfigValue(Base):
-    __tablename__ = 'config'
+class App(Base):
+    """
+    Model App
+    """
+    __tablename__ = 'app'
     __table_args__ = {"schema": "proxy"}
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    value = Column(String)
+    jid = Column(String)

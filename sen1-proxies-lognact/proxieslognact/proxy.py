@@ -32,7 +32,7 @@ class Proxy(object):
         '''
         self.suspended = False
         self.pushoutboxjob = None
-    
+        self.federationProtocol = None
     
     
     def _exit_handler(self, signum, flag):
@@ -41,7 +41,6 @@ class Proxy(object):
         """
         self.logger.info(f"Handle exit signal : {signum}")
         self.suspended = True
-        
     
     
     def start(self):
@@ -49,20 +48,19 @@ class Proxy(object):
         Démarrage du proxy
         """
         self.logger.info(f"Starting proxy server... [{applicationContext.environnement}]")
-        
-        # Exécution du job pushoutbox toutes les 5 minutes
+        self.federationProtocol.start()
+        # Planification des jobs
         self.logger.info(f"Scheduling 'pushoutboxjob' every {settings['jobs']['pushoutboxjob']['interval']} minutes...")
         #schedule.every(settings['jobs']['pushoutboxjob']['interval']).minutes.do(self.pushoutboxjob.execute, schedule)
         self.pushoutboxjob.execute(None)
 
-    
     
     def stop(self):
         """
         Arrête le proxy
         """
         self.logger.info("Stopping proxy server...")
-        
+        self.federationProtocol.stop()
         
         
     def run(self):

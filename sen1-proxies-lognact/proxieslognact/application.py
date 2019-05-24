@@ -94,12 +94,10 @@ class ApplicationContext(object):
 # ------------------------------------------------------------------------------
 
 beans = {
-    "datasource": {
-        "class": "proxieslognact.persistance.datasource.Datasource"
-    },
     "proxy": {
         "class": "proxieslognact.proxy.Proxy",
         "pushoutboxjob": "bean:pushoutboxjob",
+        "federationProtocol": "bean:federationProtocol"
     },
     "lognact": {
         "class": "proxieslognact.api.zabbix.Zabbix",
@@ -111,11 +109,23 @@ beans = {
         "proxyService": "bean:proxyService",
         "consumerService": "bean:consumerService"
     },
+    "messageHandler": {
+        "class": "proxieslognact.federation.handler.outbox.OutboxMessageHandler",
+        "outboxService": "bean:outboxService",
+        "messageSerializer": "bean:messageSerializer"
+    },
+    "messageSerializer": {
+        "class": "proxieslognact.federation.serializer.senml.SenMLMessageSerializer",
+    },
     "proxyService": {
         "class": "proxieslognact.service.proxy.ProxyService",
         "lognact": "bean:lognact",
         "consumerService": "bean:consumerService",
         "messageHandler": "bean:messageHandler"
+    },
+    "federationProtocol": {
+        "class": "proxieslognact.federation.xmpp.XmppFederationProtocol",
+        "configService": "bean:configService"
     },
     "configService": {
         "class": "proxieslognact.service.config.ConfigService"
@@ -126,13 +136,8 @@ beans = {
     "outboxService": {
         "class": "proxieslognact.service.outbox.OutboxService"
     },
-    "messageHandler": {
-        "class": "proxieslognact.federation.handler.outbox.OutboxMessageHandler",
-        "outboxService": "bean:outboxService",
-        "messageSerializer": "bean:messageSerializer"
-    },
-    "messageSerializer": {
-        "class": "proxieslognact.federation.serializer.senml.SenMLMessageSerializer",
+    "datasource": {
+        "class": "proxieslognact.persistance.datasource.Datasource"
     }
 }
 

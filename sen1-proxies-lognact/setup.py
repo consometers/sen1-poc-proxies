@@ -23,7 +23,8 @@ setup(
         'requests',
         'pyzabbix',
         'sqlalchemy',
-        'psycopg2'
+        'psycopg2',
+        'sleekxmpp'
     ],
     entry_points = {
         "console_scripts": [

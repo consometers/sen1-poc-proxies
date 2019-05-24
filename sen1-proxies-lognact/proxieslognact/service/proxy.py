@@ -36,8 +36,7 @@ class ProxyService(object):
         datas = self.lognact.fetch_consumer_data(consumer)
         
         if (datas and len(datas)):
-            # construction du message au format fédération pour être enregistré
-            # dans la outbox
+            # construction du message au format fédération
             message = Builder(Message) \
                 .username(consumer.userApp.user.username) \
                 .applicationDst(consumer.consumerApp.name) \

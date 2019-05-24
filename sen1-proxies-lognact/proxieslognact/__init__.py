@@ -1,5 +1,7 @@
 """
-Module log
+Configuration du projet
+* logger
+* settings
 
 @author: Gregory Elléouet
 """
@@ -10,14 +12,19 @@ from logging.config import dictConfig
 from proxieslognact.application import applicationContext
 
 
+# ------------------------------------------------------------------------------
+# logger    
+# ------------------------------------------------------------------------------
+
 # logger personnalisé en fonction environnement
 envLoggers = {
     "dev": {
         "root": logging.INFO,
         "loggers": {
             # insert here config logger
-            "pyzabbix": { "level": logging.DEBUG},
-            "sqlachemy.sql": { "level": logging.DEBUG}
+            "pyzabbix": { "level": logging.INFO},
+            "proxieslognact.federation.message": { "level": logging.DEBUG},
+            "sqlalchemy.engine.base.Engine": { "level": logging.DEBUG}
         }
     },
     "prod": {
@@ -33,7 +40,7 @@ dictConfig(dict(
     version = 1,
     formatters = {
         "default_formatter" : {
-            "format": "%(asctime)s %(levelname)s [%(threadName)s] %(module)s - %(message)s"
+            "format": "%(asctime)s %(levelname)s [%(threadName)s] %(name)s - %(message)s"
         }
     },
     handlers = {
@@ -49,6 +56,25 @@ dictConfig(dict(
     }
 ))
 
+
+# ------------------------------------------------------------------------------
+# settings    
+# ------------------------------------------------------------------------------
+
+settings = {
+    "proxy": {
+        "firstMaxValue": 500
+    },
+    "persistance": {
+        "paginationBackendMax": 100, 
+        "paginationFrontendMax": 25 
+    },
+    "jobs": {
+        "pushoutboxjob": {
+            "interval": 5
+        }
+    }
+}
 
 
         

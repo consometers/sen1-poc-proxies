@@ -6,7 +6,7 @@ Module application
 Contexte applicatif
 Déclare les objets de l'application et les créé dynamiquement à la demande
 Gère aussi la configuration globale du projet
-Ceci permet aussi des dépendances cycliques entre module car les modules sont
+Ceci permet aussi d'éviter des dépendances cycliques entre module car les modules sont
 importées dynamiquement
 
 @author: Gregory Elléouet
@@ -33,9 +33,7 @@ class ApplicationContext(object):
         
         if "PROXY_ENV" in os.environ:
             self.environnement = os.environ["PROXY_ENV"]
-    
-            if (not self.environnement in ["dev", "prod"]):
-                raise RuntimeError(f"'{self.environnement}' environnement not recognized !")
+            assert self.environnement in ["dev", "prod"], f"ApplicationContext : '{self.environnement}' environnement not recognized !"
         else:
             self.environnement = "prod"
         
@@ -43,7 +41,7 @@ class ApplicationContext(object):
     def _set_attrs(self, bean, attrs):
         """
         Injecte les propriétés d'un bean
-        Une propriété peut être une référence vers un aure bean
+        Une propriété peut être une référence vers un autre bean
         :param bean
         :param attrs
         """
@@ -70,10 +68,8 @@ class ApplicationContext(object):
         # l'objet n'a pas encore été instancié, on le créé à la demande   
         # s'il existe dans le dictionnaire     
         if not name in self.instances:
+            assert name in beans, f"ApplicationContext : bean {name} is not declared !"
             beanDict = beans[name]
-            
-            if beanDict == None:
-                raise RuntimeError(f"bean {name} is not declared !")
             
             module_path, class_name = beanDict["class"].rsplit('.', 1)
             module = import_module(module_path)
@@ -98,23 +94,45 @@ class ApplicationContext(object):
 # ------------------------------------------------------------------------------
 
 beans = {
+    "datasource": {
+        "class": "proxieslognact.persistance.datasource.Datasource"
+    },
     "proxy": {
         "class": "proxieslognact.proxy.Proxy",
         "pushoutboxjob": "bean:pushoutboxjob",
     },
     "lognact": {
         "class": "proxieslognact.api.zabbix.Zabbix",
+        "consumerService": "bean:consumerService",
+        "configService": "bean:configService"
     },
     "pushoutboxjob": {
         "class": "proxieslognact.job.pushoutbox.PushOutboxJob",
+        "proxyService": "bean:proxyService",
+        "consumerService": "bean:consumerService"
+    },
+    "proxyService": {
+        "class": "proxieslognact.service.proxy.ProxyService",
         "lognact": "bean:lognact",
-        "configService": "bean:configService"
+        "consumerService": "bean:consumerService",
+        "messageHandler": "bean:messageHandler"
     },
     "configService": {
         "class": "proxieslognact.service.config.ConfigService"
     },
-    "datasource": {
-        "class": "proxieslognact.util.datasource.Datasource"
+    "consumerService": {
+        "class": "proxieslognact.service.consumer.ConsumerService"
+    },
+    "outboxService": {
+        "class": "proxieslognact.service.outbox.OutboxService"
+    },
+    "messageHandler": {
+        "class": "proxieslognact.federation.handler.outbox.OutboxMessageHandler",
+        "outboxService": "bean:outboxService",
+        "messageSerializer": "bean:messageSerializer"
+    },
+    "messageSerializer": {
+        "class": "proxieslognact.federation.serializer.senml.SenMLMessageSerializer",
     }
 }
 

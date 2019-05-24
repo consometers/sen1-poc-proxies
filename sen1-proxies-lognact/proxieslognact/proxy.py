@@ -12,6 +12,7 @@ import sys
 import schedule
 
 from proxieslognact.application import applicationContext
+from proxieslognact import settings
 
 
 __all__ = ['Proxy', 'main']
@@ -50,7 +51,8 @@ class Proxy(object):
         self.logger.info(f"Starting proxy server... [{applicationContext.environnement}]")
         
         # Exécution du job pushoutbox toutes les 5 minutes
-        #schedule.every(1).minutes.do(self.pushoutboxjob.execute, schedule)
+        self.logger.info(f"Scheduling 'pushoutboxjob' every {settings['jobs']['pushoutboxjob']['interval']} minutes...")
+        #schedule.every(settings['jobs']['pushoutboxjob']['interval']).minutes.do(self.pushoutboxjob.execute, schedule)
         self.pushoutboxjob.execute(None)
 
     
@@ -94,7 +96,7 @@ def main():
     
     
     
-# exécution autoname
+# exécution autonome
 if __name__ == "__main__":
     main()
     

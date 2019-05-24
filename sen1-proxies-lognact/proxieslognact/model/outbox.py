@@ -18,6 +18,6 @@ class Outbox(Base):
     __tablename__ = 'outbox'
     __table_args__ = {"schema": "proxy"}
 
-    id = Column(Integer, primary_key=True, Sequence("sqlachemy_sequence"))
+    id = Column(Integer, Sequence("sqlachemy_sequence"), primary_key=True)
     data = Column(LargeBinary)
     received_date = Column(DateTime)

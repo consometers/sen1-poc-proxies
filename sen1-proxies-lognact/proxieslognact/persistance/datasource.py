@@ -28,9 +28,7 @@ class Datasource(object):
         Constructor
         '''
         self.engine = None
-        
-        if not "DATASOURCE_URL" in os.environ:
-            raise RuntimeError("Environment DATASOURCE_URL is required !")
+        assert "DATASOURCE_URL" in os.environ, "Environment DATASOURCE_URL is required !"
         
     
     def _init_datasource(self):

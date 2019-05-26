@@ -32,6 +32,7 @@ class Proxy(object):
         '''
         self.suspended = False
         self.pushoutboxjob = None
+        self.fetchoutboxjob = None
         self.federationProtocol = None
     
     
@@ -48,11 +49,16 @@ class Proxy(object):
         Démarrage du proxy
         """
         self.logger.info(f"Starting proxy server... [{applicationContext.environnement}]")
+        
         self.federationProtocol.start()
+        
         # Planification des jobs
         self.logger.info(f"Scheduling 'pushoutboxjob' every {settings['jobs']['pushoutboxjob']['interval']} minutes...")
         #schedule.every(settings['jobs']['pushoutboxjob']['interval']).minutes.do(self.pushoutboxjob.execute, schedule)
-        self.pushoutboxjob.execute(None)
+        self.logger.info(f"Scheduling 'fetchoutboxjob' every {settings['jobs']['fetchoutboxjob']['interval']} minutes...")
+        #schedule.every(settings['jobs']['fetchoutboxjob']['interval']).minutes.do(self.fetchoutboxjob.execute, schedule)
+        #self.pushoutboxjob.execute(None)
+        self.fetchoutboxjob.execute(None)
 
     
     def stop(self):

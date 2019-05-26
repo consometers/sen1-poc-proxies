@@ -17,11 +17,13 @@ class ProxyService(object):
         """
         self.lognact = None
         self.consumerService = None
-        self.messageHandler = None
+        self.messageSerializer = None
+        self.outboxService = None
+        self.federationProtocol = None
     
     
     @transactional(readonly = False)
-    def federate_consumer_data(self, consumerId, session=None):
+    def handle_consumer_data(self, consumerId, messageHandler, session=None):
         """
         Fetch les dernières données d'un consumer et les transforme en message
         au format du réseau fédéré
@@ -29,6 +31,7 @@ class ProxyService(object):
         handler peut faire un envoi direct, ou un stockage intermédiaire en base, etc)
         
         :param consumerId: l'id du consumer
+        :param messageHandler: le gestionnaire de message
         :param session: auto injecté par le decorator transactional
         """
         consumer = self.consumerService.fetchId(consumerId)
@@ -56,7 +59,7 @@ class ProxyService(object):
             message.asserts()
             
             # le handler prend le relai pour traiter le message
-            self.messageHandler.handle(message)
+            messageHandler.handle(message)
             
             # si aucune erreur pendant tout le process, on peut flagguer le consumer
             # avec la date de la dernière valeur extraite
@@ -64,3 +67,23 @@ class ProxyService(object):
             self.consumerService.save(consumer)
         
     
+    @transactional(readonly = False)
+    def federate_outbox_data(self, outboxId, session=None):
+        """
+        Charge les datas d'une outbox et les envoit sur le réseau fédéré
+        Les datas sont supprimées si l'envoit s'est bien passé
+        
+        :param outboxId: id oubox
+        :param session: auto injecté par le decorator transactional
+        """
+        outbox = self.outboxService.fetchId(outboxId)
+        
+        # deserialise le message depuis les datas de la outbox
+        # et vérifie sa conformité
+        message = self.messageSerializer.read(outbox.data)
+        
+        # envoi du message
+        self.federationProtocol.sendMessage(message)
+        
+        # si aucune erreur, la outbox est supprimée
+        self.outboxService.delete(outbox)

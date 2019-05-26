@@ -97,6 +97,7 @@ beans = {
     "proxy": {
         "class": "proxieslognact.proxy.Proxy",
         "pushoutboxjob": "bean:pushoutboxjob",
+        "fetchoutboxjob": "bean:fetchoutboxjob",
         "federationProtocol": "bean:federationProtocol"
     },
     "lognact": {
@@ -107,7 +108,13 @@ beans = {
     "pushoutboxjob": {
         "class": "proxieslognact.job.pushoutbox.PushOutboxJob",
         "proxyService": "bean:proxyService",
-        "consumerService": "bean:consumerService"
+        "consumerService": "bean:consumerService",
+        "messageHandler": "bean:messageHandler"
+    },
+    "fetchoutboxjob": {
+        "class": "proxieslognact.job.fetchoutbox.FetchOutboxJob",
+        "proxyService": "bean:proxyService",
+        "outboxService": "bean:outboxService"
     },
     "messageHandler": {
         "class": "proxieslognact.federation.handler.outbox.OutboxMessageHandler",
@@ -115,17 +122,20 @@ beans = {
         "messageSerializer": "bean:messageSerializer"
     },
     "messageSerializer": {
-        "class": "proxieslognact.federation.serializer.senml.SenMLMessageSerializer",
+        "class": "proxieslognact.federation.serializer.bytearray.ByteArrayMessageSerializer",
     },
     "proxyService": {
         "class": "proxieslognact.service.proxy.ProxyService",
         "lognact": "bean:lognact",
         "consumerService": "bean:consumerService",
-        "messageHandler": "bean:messageHandler"
+        "messageSerializer": "bean:messageSerializer",
+        "outboxService": "bean:outboxService",
+        "federationProtocol": "bean:federationProtocol"
     },
     "federationProtocol": {
         "class": "proxieslognact.federation.xmpp.XmppFederationProtocol",
-        "configService": "bean:configService"
+        "configService": "bean:configService",
+        "appService": "bean:appService"
     },
     "configService": {
         "class": "proxieslognact.service.config.ConfigService"
@@ -135,6 +145,9 @@ beans = {
     },
     "outboxService": {
         "class": "proxieslognact.service.outbox.OutboxService"
+    },
+    "appService": {
+        "class": "proxieslognact.service.app.AppService"
     },
     "datasource": {
         "class": "proxieslognact.persistance.datasource.Datasource"

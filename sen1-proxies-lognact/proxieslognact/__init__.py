@@ -23,14 +23,15 @@ envLoggers = {
         "loggers": {
             # insert here config logger
             "pyzabbix": { "level": logging.INFO},
-            "proxieslognact.federation.message": { "level": logging.DEBUG},
-            "sqlalchemy.engine.base.Engine": { "level": logging.DEBUG}
+            "proxieslognact.federation.xmpp": { "level": logging.DEBUG},
+            "sqlalchemy.engine.base.Engine": { "level": logging.INFO}
         }
     },
     "prod": {
         "root": logging.INFO,
         "loggers": {
             # insert here config logger
+            "sqlalchemy.engine.base.Engine": { "level": logging.WARN}
         }
     }
 }
@@ -71,6 +72,9 @@ settings = {
     },
     "jobs": {
         "pushoutboxjob": {
+            "interval": 5
+        },
+        "fetchoutboxjob": {
             "interval": 5
         }
     }

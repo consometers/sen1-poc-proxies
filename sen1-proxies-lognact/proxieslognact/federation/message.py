@@ -6,11 +6,9 @@ Created on 24 mai 2019
 """
 
 from abc import ABC, abstractmethod
-import logging
 
 
 _all__ = ['Message', 'MessageData', 'MessageHandler', 'MessageSerializer']
-logger = logging.getLogger(__name__)
 
 
 class MessageSerializer(ABC):
@@ -92,7 +90,6 @@ class Message(object):
         
         data = MessageData(value, timestamp)
         self.datas.append(data)
-        logger.debug(f"Add data [value:{value}] [timestamp:{timestamp}] to message")
         
         # on en profite pour calculer la date de la donnée la plus récente
         if (not self._dateLastValue or timestamp > self._dateLastValue):

@@ -9,9 +9,9 @@ import pickle
 from proxieslognact.federation.message import MessageSerializer
 
 
-class SenMLMessageSerializer(MessageSerializer):
+class ByteArrayMessageSerializer(MessageSerializer):
     """
-    Serializer/Deserializer de message au format XML SenL
+    Serializer/Deserializer de message en bytearray
     """
     
     def write(self, message):
@@ -19,4 +19,4 @@ class SenMLMessageSerializer(MessageSerializer):
     
     
     def read(self, buffer):
-        pass
+        return pickle._loads(buffer)

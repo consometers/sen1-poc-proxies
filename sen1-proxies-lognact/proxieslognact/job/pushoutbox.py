@@ -9,10 +9,10 @@ from proxieslognact import settings
 
 class PushOutboxJob(object):
     """
-    Job pour charger les données du système local (lognact) et les envoyer sur
-    la boite "outbox" 
+    Job pour charger les données du système local (lognact) et les traiter
+    par un gestionnaire de message
     Ce job ne fait pas le travail final mais il se charge juste de charger les
-    consumers par paquet et délègue le travail à un sous-job
+    consumers par paquet et délègue le travail à handler
     """
 
     def __init__(self):
@@ -21,13 +21,14 @@ class PushOutboxJob(object):
         """
         self.consumerService = None
         self.proxyService = None
+        self.messageHandler = None
         
     
     def execute(self, scheduler):
         """
         Exécute le job depuis un scheduler
         Charge tous les consumers associés à un objet et prépare un message pour
-        chacun d'eux à envoyer sur la boite "outbox"
+        chacun d'eux à déléguer au handler
         
         TODO : paralléliser le traitement des consumers
         """
@@ -45,7 +46,7 @@ class PushOutboxJob(object):
                 
                 for consumerId in consumerIds:
                     try:
-                        self.proxyService.federate_consumer_data(consumerId)
+                        self.proxyService.handle_consumer_data(consumerId, self.messageHandler)
                         
                     except Exception as ex:
-                        self.logger.error(f"ProxyService.federate_consumer_data : {ex}")
+                        self.logger.error(f"ProxyService.handle_consumer_data : {ex}")

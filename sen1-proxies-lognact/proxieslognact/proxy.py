@@ -48,17 +48,20 @@ class Proxy(object):
         """
         Démarrage du proxy
         """
-        self.logger.info(f"Starting proxy server... [{applicationContext.environnement}]")
+        env = applicationContext.environnement
+        self.logger.info(f"Starting proxy server... [{env}]")
         
         self.federationProtocol.start()
         
-        # Planification des jobs
-        self.logger.info(f"Scheduling 'pushoutboxjob' every {settings['jobs']['pushoutboxjob']['interval']} minutes...")
-        #schedule.every(settings['jobs']['pushoutboxjob']['interval']).minutes.do(self.pushoutboxjob.execute, schedule)
-        self.logger.info(f"Scheduling 'fetchoutboxjob' every {settings['jobs']['fetchoutboxjob']['interval']} minutes...")
-        #schedule.every(settings['jobs']['fetchoutboxjob']['interval']).minutes.do(self.fetchoutboxjob.execute, schedule)
-        #self.pushoutboxjob.execute(None)
-        self.fetchoutboxjob.execute(None)
+        # Planification des jobs (en prod, sinon exécution directe)
+        if (env == "prod"):
+            self.logger.info(f"Scheduling 'pushoutboxjob' every {settings['jobs']['pushoutboxjob']['interval']} minutes...")
+            schedule.every(settings['jobs']['pushoutboxjob']['interval']).minutes.do(self.pushoutboxjob.execute, schedule)
+            self.logger.info(f"Scheduling 'fetchoutboxjob' every {settings['jobs']['fetchoutboxjob']['interval']} minutes...")
+            schedule.every(settings['jobs']['fetchoutboxjob']['interval']).minutes.do(self.fetchoutboxjob.execute, schedule)
+        else:
+            self.pushoutboxjob.execute(None)
+            self.fetchoutboxjob.execute(None)
 
     
     def stop(self):

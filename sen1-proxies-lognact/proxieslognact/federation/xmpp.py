@@ -6,7 +6,7 @@ Created on 24 mai 2019
 
 from sleekxmpp import ClientXMPP
 from sleekxmpp import Message
-from sleekxmpp.xmlstream import ElementBase, register_stanza_plugin
+from sleekxmpp.xmlstream import ElementBase, ET, register_stanza_plugin
 
 from proxieslognact.federation.protocol import FederationProtocol
 
@@ -42,7 +42,7 @@ class XmppFederationProtocol(FederationProtocol):
         self.xmpp.add_event_handler("session_start", self.session_start)
         self.xmpp.add_event_handler("message", self.receiveMessage)
         
-        # ajout du plugin pour taiter les stanzas
+        # ajout du plugin pour traiter les stanzas
         register_stanza_plugin(Message, XmppMessageStanza)
         
         if (not self.xmpp.connect(address = (xmppDomain, 5222))):
@@ -89,24 +89,14 @@ class XmppFederationProtocol(FederationProtocol):
         
         # recherche du JID de l'application destinataire
         app = self.appService.findByName(message.applicationDst)
+        self.logger.info(f"Sending XMPP message to {app.jid}...")
+
+        # construction d'un message
+        xmppMessage = self.xmpp.make_message(app.jid)
+        XmppMessageStanza.build_xmpp_message(xmppMessage, message).send()  
         
-        self.logger.debug(f"Sending XMPP message to {app.jid}...")
-        
-        self.xmpp.send_message(app.jid, message)
         
         
-        
-class XmppMessage(object):
-    
-    def __init__(self, message):
-        """
-        Construction d'un XMPP message à partir d'un Message
-        
-        :param message: Message
-        """
-        self.
-     
-     
 class XmppMessageStanza(ElementBase):
     #: The `name` field refers to the basic XML tag name of the stanza
     name = "Sen1Message"
@@ -137,3 +127,38 @@ class XmppMessageStanza(ElementBase):
     #:
     #: to set, get, or remove its values.
     interfaces = set(('username', 'name', 'metaname', 'unite', 'type', 'applicationSrc', 'applicationDst', 'Sen1Datas'))
+    
+    
+    @staticmethod
+    def build_xmpp_message(xmppMessage, message):
+        """
+        Construction d'un stanza à partir d'un objet Message
+        
+        :param xmppMessage: Message
+        :param message: Message
+        """
+        xmlMessage = ET.Element("Sen1Message", {
+            "xmlns": "http://xmpp.rocks",
+            "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+            "xmlns:xs": "http://www.w3.org/2001/XMLSchema"
+        })
+        xmppMessage.append(xmlMessage)
+        
+        ET.SubElement(xmlMessage, "username").text = message.username
+        ET.SubElement(xmlMessage, "name").text = message.name
+        ET.SubElement(xmlMessage, "metaname").text = message.metaname
+        ET.SubElement(xmlMessage, "metavalue").text = message.metavalue
+        ET.SubElement(xmlMessage, "unite").text = message.unite
+        ET.SubElement(xmlMessage, "type").text = message.type
+        ET.SubElement(xmlMessage, "applicationSrc").text = message.applicationSrc
+        ET.SubElement(xmlMessage, "applicationDst").text = message.applicationDst
+        
+        # ajout des datas
+        xmlDatas = ET.SubElement(xmlMessage, "Sen1Datas")
+        
+        for data in message.datas:
+            xmlData = ET.SubElement(xmlDatas, "Sen1Data")
+            ET.SubElement(xmlData, "value", {"xsi:type": "xs:string"}).text = data.value
+            ET.SubElement(xmlData, "timestamp").text = data.timestamp.strftime("%Y-%m-%dT%H:%M:%S") 
+        
+        return xmppMessage

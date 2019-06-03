@@ -11,8 +11,8 @@ import signal
 import sys
 import schedule
 
-from proxieslognact.application import applicationContext
 from proxieslognact import settings
+from proxieslognact import applicationContext
 
 
 __all__ = ['Proxy', 'main']

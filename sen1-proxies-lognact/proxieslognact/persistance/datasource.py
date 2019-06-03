@@ -11,7 +11,7 @@ import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
 
-from proxieslognact.application import applicationContext
+from proxieslognact import applicationContext
 
 
 class Datasource(object):

@@ -17,7 +17,7 @@ import logging
 from importlib import import_module
 
 
-__all__ = ['ApplicationContext', 'applicationContext']
+__all__ = ['ApplicationContext']
 
 
 class ApplicationContext(object):
@@ -25,11 +25,12 @@ class ApplicationContext(object):
     Contexte applicatif
     Instancie les beans à la demande à partir du dictionnaire beans
     """
-    def __init__(self):
+    def __init__(self, beans):
         """
         Constructor
         """
         self.instances = {}
+        self.beans = beans
         
         if "PROXY_ENV" in os.environ:
             self.environnement = os.environ["PROXY_ENV"]
@@ -68,8 +69,8 @@ class ApplicationContext(object):
         # l'objet n'a pas encore été instancié, on le créé à la demande   
         # s'il existe dans le dictionnaire     
         if not name in self.instances:
-            assert name in beans, f"ApplicationContext : bean {name} is not declared !"
-            beanDict = beans[name]
+            assert name in self.beans, f"ApplicationContext : bean {name} is not declared !"
+            beanDict = self.beans[name]
             
             module_path, class_name = beanDict["class"].rsplit('.', 1)
             module = import_module(module_path)
@@ -86,95 +87,3 @@ class ApplicationContext(object):
             bean = self.instances[name]
         
         return bean
-    
-
-
-# ------------------------------------------------------------------------------
-# beans : dictionnaire des beans de l'application    
-# ------------------------------------------------------------------------------
-
-beans = {
-    "proxy": {
-        "class": "proxieslognact.proxy.Proxy",
-        "pushoutboxjob": "bean:pushoutboxjob",
-        "fetchoutboxjob": "bean:fetchoutboxjob",
-        "fetchinboxjob": "bean:fetchinboxjob",
-        "federationProtocol": "bean:federationProtocol"
-    },
-    "lognact": {
-        "class": "proxieslognact.api.zabbix.Zabbix",
-        "configService": "bean:configService"
-    },
-    "pushoutboxjob": {
-        "class": "proxieslognact.job.pushoutbox.PushOutboxJob",
-        "proxyService": "bean:proxyService",
-        "consumerService": "bean:consumerService",
-        "messageHandler": "bean:outboxMessageHandler"
-    },
-    "fetchoutboxjob": {
-        "class": "proxieslognact.job.fetchoutbox.FetchOutboxJob",
-        "proxyService": "bean:proxyService",
-        "outboxService": "bean:outboxService"
-    },
-    "fetchinboxjob": {
-        "class": "proxieslognact.job.fetchinbox.FetchInboxJob",
-        "proxyService": "bean:proxyService",
-        "inboxService": "bean:inboxService"
-    },
-    "outboxMessageHandler": {
-        "class": "proxieslognact.federation.handler.outbox.OutboxMessageHandler",
-        "outboxService": "bean:outboxService",
-        "messageSerializer": "bean:messageSerializer"
-    },
-    "inboxMessageHandler": {
-        "class": "proxieslognact.federation.handler.inbox.InboxMessageHandler",
-        "inboxService": "bean:inboxService",
-        "messageSerializer": "bean:messageSerializer"
-    },
-    "messageSerializer": {
-        "class": "proxieslognact.federation.serializer.bytearray.ByteArrayMessageSerializer",
-    },
-    "proxyService": {
-        "class": "proxieslognact.service.proxy.ProxyService",
-        "lognact": "bean:lognact",
-        "consumerService": "bean:consumerService",
-        "messageSerializer": "bean:messageSerializer",
-        "outboxService": "bean:outboxService",
-        "inboxService": "bean:inboxService",
-        "configService": "bean:configService",
-        "userAppService": "bean:userAppService",
-        "federationProtocol": "bean:federationProtocol"
-    },
-    "federationProtocol": {
-        "class": "proxieslognact.federation.xmpp.XmppFederationProtocol",
-        "configService": "bean:configService",
-        "appService": "bean:appService",
-        "messageHandler": "bean:inboxMessageHandler"
-    },
-    "configService": {
-        "class": "proxieslognact.service.config.ConfigService"
-    },
-    "consumerService": {
-        "class": "proxieslognact.service.consumer.ConsumerService"
-    },
-    "outboxService": {
-        "class": "proxieslognact.service.outbox.OutboxService"
-    },
-    "inboxService": {
-        "class": "proxieslognact.service.inbox.InboxService"
-    },
-    "appService": {
-        "class": "proxieslognact.service.app.AppService"
-    },
-    "userAppService": {
-        "class": "proxieslognact.service.user_app.UserAppService"
-    },
-    "datasource": {
-        "class": "proxieslognact.persistance.datasource.Datasource"
-    }
-}
-
-
-
-# le conteneur principal de l'application
-applicationContext = ApplicationContext()

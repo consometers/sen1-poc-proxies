@@ -23,7 +23,7 @@ setup(
         'requests',
         'pyzabbix',
         'sqlalchemy',
-        'psycopg2',
+        'psycopg2-binary',
         # bug avec les certificats let's encrypt
         # https://stackoverflow.com/questions/46230357/sleekxmpp-certificate-has-expired
         'sleekxmpp==1.3.1',
@@ -31,7 +31,8 @@ setup(
         # dernière version de pyasn ne fonctionne pas avec sleekxmpp
         # https://github.com/fritzy/SleekXMPP/issues/477
         'pyasn1==0.3.7', 
-        'pyasn1_modules==0.1.5'
+        'pyasn1_modules==0.1.5',
+        'protobix'
     ],
     entry_points = {
         "console_scripts": [

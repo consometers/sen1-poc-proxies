@@ -33,6 +33,7 @@ class Proxy(object):
         self.suspended = False
         self.pushoutboxjob = None
         self.fetchoutboxjob = None
+        self.fetchinboxjob = None
         self.federationProtocol = None
     
     
@@ -57,11 +58,17 @@ class Proxy(object):
         if (env == "prod"):
             self.logger.info(f"Scheduling 'pushoutboxjob' every {settings['jobs']['pushoutboxjob']['interval']} minutes...")
             schedule.every(settings['jobs']['pushoutboxjob']['interval']).minutes.do(self.pushoutboxjob.execute, schedule)
+            
             self.logger.info(f"Scheduling 'fetchoutboxjob' every {settings['jobs']['fetchoutboxjob']['interval']} minutes...")
             schedule.every(settings['jobs']['fetchoutboxjob']['interval']).minutes.do(self.fetchoutboxjob.execute, schedule)
+            
+            self.logger.info(f"Scheduling 'fetchinboxjob' every {settings['jobs']['fetchinboxjob']['interval']} minutes...")
+            schedule.every(settings['jobs']['fetchinboxjob']['interval']).minutes.do(self.fetchinboxjob.execute, schedule)
         else:
             self.pushoutboxjob.execute(None)
             self.fetchoutboxjob.execute(None)
+            self.fetchinboxjob.execute(None)
+            pass
 
     
     def stop(self):

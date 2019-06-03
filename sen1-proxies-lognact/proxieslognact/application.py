@@ -98,27 +98,37 @@ beans = {
         "class": "proxieslognact.proxy.Proxy",
         "pushoutboxjob": "bean:pushoutboxjob",
         "fetchoutboxjob": "bean:fetchoutboxjob",
+        "fetchinboxjob": "bean:fetchinboxjob",
         "federationProtocol": "bean:federationProtocol"
     },
     "lognact": {
         "class": "proxieslognact.api.zabbix.Zabbix",
-        "consumerService": "bean:consumerService",
         "configService": "bean:configService"
     },
     "pushoutboxjob": {
         "class": "proxieslognact.job.pushoutbox.PushOutboxJob",
         "proxyService": "bean:proxyService",
         "consumerService": "bean:consumerService",
-        "messageHandler": "bean:messageHandler"
+        "messageHandler": "bean:outboxMessageHandler"
     },
     "fetchoutboxjob": {
         "class": "proxieslognact.job.fetchoutbox.FetchOutboxJob",
         "proxyService": "bean:proxyService",
         "outboxService": "bean:outboxService"
     },
-    "messageHandler": {
+    "fetchinboxjob": {
+        "class": "proxieslognact.job.fetchinbox.FetchInboxJob",
+        "proxyService": "bean:proxyService",
+        "inboxService": "bean:inboxService"
+    },
+    "outboxMessageHandler": {
         "class": "proxieslognact.federation.handler.outbox.OutboxMessageHandler",
         "outboxService": "bean:outboxService",
+        "messageSerializer": "bean:messageSerializer"
+    },
+    "inboxMessageHandler": {
+        "class": "proxieslognact.federation.handler.inbox.InboxMessageHandler",
+        "inboxService": "bean:inboxService",
         "messageSerializer": "bean:messageSerializer"
     },
     "messageSerializer": {
@@ -130,12 +140,16 @@ beans = {
         "consumerService": "bean:consumerService",
         "messageSerializer": "bean:messageSerializer",
         "outboxService": "bean:outboxService",
+        "inboxService": "bean:inboxService",
+        "configService": "bean:configService",
+        "userAppService": "bean:userAppService",
         "federationProtocol": "bean:federationProtocol"
     },
     "federationProtocol": {
         "class": "proxieslognact.federation.xmpp.XmppFederationProtocol",
         "configService": "bean:configService",
-        "appService": "bean:appService"
+        "appService": "bean:appService",
+        "messageHandler": "bean:inboxMessageHandler"
     },
     "configService": {
         "class": "proxieslognact.service.config.ConfigService"
@@ -146,8 +160,14 @@ beans = {
     "outboxService": {
         "class": "proxieslognact.service.outbox.OutboxService"
     },
+    "inboxService": {
+        "class": "proxieslognact.service.inbox.InboxService"
+    },
     "appService": {
         "class": "proxieslognact.service.app.AppService"
+    },
+    "userAppService": {
+        "class": "proxieslognact.service.user_app.UserAppService"
     },
     "datasource": {
         "class": "proxieslognact.persistance.datasource.Datasource"

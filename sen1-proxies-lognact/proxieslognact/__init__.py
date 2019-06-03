@@ -76,6 +76,9 @@ settings = {
         },
         "fetchoutboxjob": {
             "interval": 5
+        },
+        "fetchinboxjob": {
+            "interval": 1
         }
     }
 }

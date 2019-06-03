@@ -5,6 +5,7 @@
 
 from datetime import datetime
 
+from protobix import SampleProbe
 from pyzabbix import ZabbixAPI, ZabbixAPIException
 from requests.exceptions import ReadTimeout
 
@@ -27,8 +28,24 @@ class Zabbix(LogNAct):
     def push_data(self, command):
         """
         Envoit des données vers le serveur
+        
+        :param command: critère de sélection et connexion
         """
-        pass
+        super()._load_config()
+        
+        command.asserts()
+        
+        zabbixSender = ZabbixSender()
+        result = zabbixSender.run()
+        
+        if (result == 1):
+            raise Exception("Step 1: probe initialization")
+        elif (result == 2):
+            raise Exception("Step 2 : probe data collection")
+        elif (result == 3):
+            raise Exception("Step 3 : add data to DataContainer")
+        elif (result == 4):
+            raise Exception("Step 4 : send data to Zabbix")
     
     
     def datapoint_value(self, data):
@@ -55,11 +72,14 @@ class Zabbix(LogNAct):
         """
         Récupère des données depuis le serveur à partir des critères de sélection
         spécifiés en paramètre
-        @param command: critère de sélection et connexion
+        
+        :param command: critère de sélection et connexion
         """
+        super()._load_config()
+        
         command.asserts()
         
-        zapi = ZabbixAPI(server = command.serverUrl, timeout = 2.5)
+        zapi = ZabbixAPI(server = self.serverUrl, timeout = 2.5)
         datas = None
         
         try:
@@ -95,4 +115,15 @@ class Zabbix(LogNAct):
         
         return datas
         
-        
+
+
+class ZabbixSender(SampleProbe):
+    
+    def _get_metrics(self):
+        # mandatory method
+        pass
+    
+    
+    def _get_discovery(self):
+        # mandatory method
+        pass

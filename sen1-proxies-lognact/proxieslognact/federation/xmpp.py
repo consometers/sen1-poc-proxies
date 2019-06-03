@@ -4,14 +4,21 @@ Created on 24 mai 2019
 @author: Gregory Elléouet
 '''
 
+from datetime import datetime
+
 from sleekxmpp import ClientXMPP
 from sleekxmpp import Message
+from sleekxmpp.plugins.base import base_plugin
 from sleekxmpp.xmlstream import ElementBase, ET, register_stanza_plugin
+from sleekxmpp.xmlstream.handler import Callback
+from sleekxmpp.xmlstream.matcher import MatchXPath
 
 from proxieslognact.federation.protocol import FederationProtocol
+from proxieslognact.federation.message import Message as FederationMessage
+from proxieslognact.federation import xmpp
 
 
-_all__ = ['XmppFederationProtocol']
+_all__ = ['XmppFederationProtocol', 'XmppMessagePlugin']
 
 
 class XmppFederationProtocol(FederationProtocol):
@@ -28,6 +35,7 @@ class XmppFederationProtocol(FederationProtocol):
         self.configService = None
         self.appService = None
         self.xmpp = None
+        self.messageHandler = None
         
     
     def start(self):
@@ -38,11 +46,12 @@ class XmppFederationProtocol(FederationProtocol):
         self.logger.info(f"Start XMPP protocol : try connecting {xmppDomain}...")
         self.xmpp = ClientXMPP(self.configService.value("XMPP_USERNAME"), self.configService.value("XMPP_PASSWORD"))
         
-        # ajout des listeners
+        # ajout des listeners et plugins
         self.xmpp.add_event_handler("session_start", self.session_start)
-        self.xmpp.add_event_handler("message", self.receiveMessage)
-        
-        # ajout du plugin pour traiter les stanzas
+        self.xmpp.register_plugin('XmppMessagePlugin', module=xmpp)
+        self.xmpp.register_handler(Callback('SEN1 Message',
+                                            MatchXPath('{%s}message/{http://xmpp.rocks}Sen1Message' % self.xmpp.default_ns),
+                                            self.receiveMessage))
         register_stanza_plugin(Message, XmppMessageStanza)
         
         if (not self.xmpp.connect(address = (xmppDomain, 5222))):
@@ -74,7 +83,13 @@ class XmppFederationProtocol(FederationProtocol):
         
         :param stanza: xmpp message
         """
-        self.logger.debug(f"Receive stanza : {stanza['message']}")
+        self.logger.info(f"Receive SEN1 message from {stanza['from']}...")
+        #self.logger.debug(f"Receive SEN1 data : {stanza['message']}")
+        try:
+            message = XmppMessageStanza.parse_xmpp_message(stanza)
+            self.messageHandler.handle(message)
+        except Exception as ex:
+            self.logger.error(f"Receive SEN1 message : {ex}")
         
         
     def sendMessage(self, message):
@@ -95,7 +110,13 @@ class XmppFederationProtocol(FederationProtocol):
         xmppMessage = self.xmpp.make_message(app.jid)
         XmppMessageStanza.build_xmpp_message(xmppMessage, message).send()  
         
-        
+
+class XmppMessagePlugin(base_plugin):
+    
+    def plugin_init(self):
+        self.description = "SEN1 Message Plugin"
+    
+   
         
 class XmppMessageStanza(ElementBase):
     #: The `name` field refers to the basic XML tag name of the stanza
@@ -138,7 +159,7 @@ class XmppMessageStanza(ElementBase):
         :param message: Message
         """
         xmlMessage = ET.Element("Sen1Message", {
-            "xmlns": "http://xmpp.rocks",
+            "xmlns": XmppMessageStanza.namespace,
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
             "xmlns:xs": "http://www.w3.org/2001/XMLSchema"
         })
@@ -162,3 +183,33 @@ class XmppMessageStanza(ElementBase):
             ET.SubElement(xmlData, "timestamp").text = data.timestamp.strftime("%Y-%m-%dT%H:%M:%S") 
         
         return xmppMessage
+    
+    
+    @staticmethod
+    def parse_xmpp_message(stanza):
+        """
+        Construction d'un objet Message à partir d'un message XMPP
+        
+        :param xmppMessage:
+        :return Message
+        """
+        xmppMessage = stanza['message']
+        message = FederationMessage()
+        
+        message.username = xmppMessage.xml.findtext("{%s}username" % XmppMessageStanza.namespace)
+        message.name = xmppMessage.xml.findtext("{%s}name" % XmppMessageStanza.namespace)
+        message.metaname = xmppMessage.xml.findtext("{%s}metaname" % XmppMessageStanza.namespace)
+        message.metavalue = xmppMessage.xml.findtext("{%s}metavalue" % XmppMessageStanza.namespace)
+        message.unite = xmppMessage.xml.findtext("{%s}unite" % XmppMessageStanza.namespace)
+        message.type = xmppMessage.xml.findtext("{%s}type" % XmppMessageStanza.namespace)
+        message.applicationSrc = xmppMessage.xml.findtext("{%s}applicationSrc" % XmppMessageStanza.namespace)
+        message.applicationDst = xmppMessage.xml.findtext("{%s}applicationDst" % XmppMessageStanza.namespace)
+        
+        for xmlData in xmppMessage.xml.findall("{%s}Sen1Datas/{%s}Sen1Data" % (XmppMessageStanza.namespace,
+                                                                            XmppMessageStanza.namespace)):
+            message.add_data(xmlData.findtext("{%s}value" % XmppMessageStanza.namespace),
+                             datetime.fromisoformat(xmlData.findtext("{%s}timestamp" % XmppMessageStanza.namespace)))
+        
+        # validation du message avant delegation
+        message.asserts()
+        return message

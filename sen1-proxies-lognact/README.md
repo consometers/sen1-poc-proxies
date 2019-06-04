@@ -7,6 +7,9 @@ Avec une version de python >= 3.6.
 S'assurer que le programme pip est installé. Sinon (sous Linux)
 > apt install python3-pip
 
+Pour compilation du driver PostgreSQL
+> apt-get install postgresql-server-dev-9.6
+
 Installation (depuis le dossier du projet) d'un script d'exécution
 > python setup.py install    
 ou     

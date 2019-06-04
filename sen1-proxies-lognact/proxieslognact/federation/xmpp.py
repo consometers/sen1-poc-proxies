@@ -43,7 +43,7 @@ class XmppFederationProtocol(FederationProtocol):
         Démarre le service
         """
         xmppDomain = self.configService.value("XMPP_DOMAIN_NAME")
-        self.logger.info(f"Start XMPP protocol : try connecting {xmppDomain}...")
+        self.logger.info("Start XMPP protocol : try connecting {}...".format(xmppDomain))
         self.xmpp = ClientXMPP(self.configService.value("XMPP_USERNAME"), self.configService.value("XMPP_PASSWORD"))
         
         # ajout des listeners et plugins
@@ -55,7 +55,7 @@ class XmppFederationProtocol(FederationProtocol):
         register_stanza_plugin(Message, XmppMessageStanza)
         
         if (not self.xmpp.connect(address = (xmppDomain, 5222))):
-            raise Exception(f"Cannot connect to {xmppDomain}")
+            raise Exception("Cannot connect to {}".format(xmppDomain))
         
         self.xmpp.process()
     
@@ -64,7 +64,7 @@ class XmppFederationProtocol(FederationProtocol):
         """
         Stoppe le service
         """
-        self.logger.info(f"Stop XMPP protocol...")
+        self.logger.info("Stop XMPP protocol...")
         self.xmpp.disconnect()
         
     
@@ -83,13 +83,13 @@ class XmppFederationProtocol(FederationProtocol):
         
         :param stanza: xmpp message
         """
-        self.logger.info(f"Receive SEN1 message from {stanza['from']}...")
-        #self.logger.debug(f"Receive SEN1 data : {stanza['message']}")
+        self.logger.info("Receive SEN1 message from {}...".format(stanza['from']))
+        
         try:
             message = XmppMessageStanza.parse_xmpp_message(stanza)
             self.messageHandler.handle(message)
         except Exception as ex:
-            self.logger.error(f"Receive SEN1 message : {ex}")
+            self.logger.error("Receive SEN1 message : {}".format(ex))
         
         
     def sendMessage(self, message):
@@ -104,7 +104,7 @@ class XmppFederationProtocol(FederationProtocol):
         
         # recherche du JID de l'application destinataire
         app = self.appService.findByName(message.applicationDst)
-        self.logger.info(f"Sending XMPP message to {app.jid}...")
+        self.logger.info("Sending XMPP message to {}...".format(app.jid))
 
         # construction d'un message
         xmppMessage = self.xmpp.make_message(app.jid)

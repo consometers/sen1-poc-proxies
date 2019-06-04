@@ -35,8 +35,8 @@ class Zabbix(LogNAct):
         
         command.asserts()
         
-        zabbixSender = ZabbixSender()
-        result = zabbixSender.run()
+        #zabbixSender = ZabbixSender()
+        #result = zabbixSender.run()
         
         if (result == 1):
             raise Exception("Step 1: probe initialization")
@@ -84,9 +84,9 @@ class Zabbix(LogNAct):
         
         try:
             zapi.login(command.user, command.password)
-            self.logger.info(f"Try connecting to {command.serverUrl}... Zabbix v{zapi.api_version()}...")
+            self.logger.info("Try connecting to {}... Zabbix v{}...".format(command.serverUrl), zapi.api_version())
         except (ZabbixAPIException, ReadTimeout, ValueError) as ex:
-            self.logger.error(f"Try connecting to {command.serverUrl} : {ex}")
+            self.logger.error("Try connecting to {} : {}".format(command.serverUrl, ex))
         
         # adapte les params en fonction du mode d'utilisation
         apiParams = dict(
@@ -99,19 +99,19 @@ class Zabbix(LogNAct):
             apiParams["time_from"] = int(command.dateStart.timestamp())
             apiParams["time_till"] = int(command.dateEnd.timestamp())
             apiParams["sortorder"] = "ASC"
-            detailHistory = f"{command.dateStart} to {command.dateEnd}"
+            detailHistory = "{} to {}".format(command.dateStart, command.dateEnd)
         else:
             # en mode limit, il faut inverser le tri pour récupérer les valeurs
             # les plus récentes
             apiParams["limit"] = command.limit
             apiParams["sortorder"] = "DESC"
-            detailHistory = f"{command.limit} last values"
+            detailHistory = "{} last values".format(command.limit)
           
         try:
             datas = zapi.history.get(**apiParams)
-            self.logger.info(f"Fetching history from {detailHistory}...{len(datas)} value(s)")
+            self.logger.info("Fetching history from {}...{} value(s)".format(detailHistory, len(datas)))
         except (ZabbixAPIException, ReadTimeout, ValueError) as ex:
-            self.logger.error(f"Fetching history from {detailHistory} : {ex}")
+            self.logger.error("Fetching history from {} : {}".format(detailHistory, ex))
         
         return datas
         

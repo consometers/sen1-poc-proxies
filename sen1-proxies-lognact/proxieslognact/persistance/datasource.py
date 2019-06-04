@@ -42,7 +42,7 @@ class Datasource(object):
             if (logging.getLogger("sqlachemy.sql") and logging.getLogger("sqlachemy.sql").level == logging.DEBUG):
                 showSql = True
                 
-            self.logger.info(f"Start SQLAlchemy {sqlalchemy.__version__} engine...")
+            self.logger.info("Start SQLAlchemy {} engine...".format(sqlalchemy.__version__))
             self.engine = sqlalchemy.create_engine(os.environ["DATASOURCE_URL"],
                                                    echo = showSql)
             self.sessionFactory = sessionmaker(bind=self.engine)

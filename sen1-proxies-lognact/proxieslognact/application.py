@@ -34,7 +34,7 @@ class ApplicationContext(object):
         
         if "PROXY_ENV" in os.environ:
             self.environnement = os.environ["PROXY_ENV"]
-            assert self.environnement in ["dev", "prod"], f"ApplicationContext : '{self.environnement}' environnement not recognized !"
+            assert self.environnement in ["dev", "prod"], "ApplicationContext : '{}' environnement not recognized !".format(self.environnement)
         else:
             self.environnement = "prod"
         
@@ -69,7 +69,7 @@ class ApplicationContext(object):
         # l'objet n'a pas encore été instancié, on le créé à la demande   
         # s'il existe dans le dictionnaire     
         if not name in self.instances:
-            assert name in self.beans, f"ApplicationContext : bean {name} is not declared !"
+            assert name in self.beans, "ApplicationContext : bean {} is not declared !".format(name)
             beanDict = self.beans[name]
             
             module_path, class_name = beanDict["class"].rsplit('.', 1)

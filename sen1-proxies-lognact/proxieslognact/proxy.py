@@ -41,7 +41,7 @@ class Proxy(object):
         """
         Handler pour l'arrêt "propre" du serveur
         """
-        self.logger.info(f"Handle exit signal : {signum}")
+        self.logger.info("Handle exit signal : {}".format(signum))
         self.suspended = True
     
     
@@ -50,19 +50,19 @@ class Proxy(object):
         Démarrage du proxy
         """
         env = applicationContext.environnement
-        self.logger.info(f"Starting proxy server... [{env}]")
+        self.logger.info("Starting proxy server... {}".format(env))
         
         self.federationProtocol.start()
         
         # Planification des jobs (en prod, sinon exécution directe)
         if (env == "prod"):
-            self.logger.info(f"Scheduling 'pushoutboxjob' every {settings['jobs']['pushoutboxjob']['interval']} minutes...")
+            self.logger.info("Scheduling 'pushoutboxjob' every {} minutes...".format(settings['jobs']['pushoutboxjob']['interval']))
             schedule.every(settings['jobs']['pushoutboxjob']['interval']).minutes.do(self.pushoutboxjob.execute, schedule)
             
-            self.logger.info(f"Scheduling 'fetchoutboxjob' every {settings['jobs']['fetchoutboxjob']['interval']} minutes...")
+            self.logger.info("Scheduling 'fetchoutboxjob' every {} minutes...".format(settings['jobs']['fetchoutboxjob']['interval']))
             schedule.every(settings['jobs']['fetchoutboxjob']['interval']).minutes.do(self.fetchoutboxjob.execute, schedule)
             
-            self.logger.info(f"Scheduling 'fetchinboxjob' every {settings['jobs']['fetchinboxjob']['interval']} minutes...")
+            self.logger.info("Scheduling 'fetchinboxjob' every {} minutes...".format(settings['jobs']['fetchinboxjob']['interval']))
             schedule.every(settings['jobs']['fetchinboxjob']['interval']).minutes.do(self.fetchinboxjob.execute, schedule)
         else:
             self.pushoutboxjob.execute(None)

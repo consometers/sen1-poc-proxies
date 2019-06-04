@@ -38,7 +38,7 @@ class PushOutboxJob(object):
         paginationMax = settings["persistance"]["paginationBackendMax"]
         nbConsumer = self.consumerService.count()
         nbPage = int(nbConsumer / paginationMax) + 1 if nbConsumer else 0
-        self.logger.info(f"Running PushOutboxJob... found {nbConsumer} consumer(s) [{nbPage} page(s)]")
+        self.logger.info("Running PushOutboxJob... found {} consumer(s) [{} page(s)]".format(nbConsumer, nbPage))
         
         if (nbConsumer):
             for page in range(0, nbPage):
@@ -49,4 +49,4 @@ class PushOutboxJob(object):
                         self.proxyService.handle_consumer_data(consumerId, self.messageHandler)
                         
                     except Exception as ex:
-                        self.logger.error(f"ProxyService.handle_consumer_data : {ex}")
+                        self.logger.error("ProxyService.handle_consumer_data : {}".format(ex))

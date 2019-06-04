@@ -34,7 +34,7 @@ class FetchInboxJob(object):
         paginationMax = settings["persistance"]["paginationBackendMax"]
         nbInbox = self.inboxService.count()
         nbPage = int(nbInbox / paginationMax) + 1 if nbInbox else 0
-        self.logger.info(f"Running FetchInboxJob... found {nbInbox} outbox(s) [{nbPage} page(s)]")
+        self.logger.info("Running FetchInboxJob... found {} outbox(s) [{} page(s)]".format(nbInbox, nbPage))
         
         if (nbInbox):
             for page in range(0, nbPage):
@@ -45,4 +45,4 @@ class FetchInboxJob(object):
                         self.proxyService.push_inbox_data(inboxId)
                         
                     except Exception as ex:
-                        self.logger.error(f"ProxyService.push_inbox_data : {ex}")
+                        self.logger.error("ProxyService.push_inbox_data : {}".format(ex))

@@ -34,7 +34,7 @@ class FetchOutboxJob(object):
         paginationMax = settings["persistance"]["paginationBackendMax"]
         nbOutbox = self.outboxService.count()
         nbPage = int(nbOutbox / paginationMax) + 1 if nbOutbox else 0
-        self.logger.info(f"Running FetchOutboxJob... found {nbOutbox} outbox(s) [{nbPage} page(s)]")
+        self.logger.info("Running FetchOutboxJob... found {} outbox(s) [{} page(s)]".format(nbOutbox, nbPage))
         
         if (nbOutbox):
             for page in range(0, nbPage):
@@ -45,4 +45,4 @@ class FetchOutboxJob(object):
                         self.proxyService.federate_outbox_data(outboxId)
                         
                     except Exception as ex:
-                        self.logger.error(f"ProxyService.federate_outbox_data : {ex}")
+                        self.logger.error("ProxyService.federate_outbox_data : {}".format(ex))

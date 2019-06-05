@@ -34,7 +34,7 @@ class FetchInboxJob(object):
         paginationMax = settings["persistance"]["paginationBackendMax"]
         nbInbox = self.inboxService.count()
         nbPage = int(nbInbox / paginationMax) + 1 if nbInbox else 0
-        self.logger.info("Running FetchInboxJob... found {} outbox(s) [{} page(s)]".format(nbInbox, nbPage))
+        self.logger.info("Running FetchInboxJob... found {} inbox(s) [{} page(s)]".format(nbInbox, nbPage))
         
         if (nbInbox):
             for page in range(0, nbPage):

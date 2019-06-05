@@ -1,5 +1,7 @@
 package sen1.proxies.bmhs.api
 
+import org.grails.web.json.JSONElement
+
 /**
  * L'interface API pour l'accès à l'application BMHS
  * 
@@ -16,5 +18,17 @@ interface BmhsApi {
 	 * 
 	 * @throws Exception
 	 */
-	void push(String url, BmhsMessage message) throws Exception
+	void push(String url, BmhsPushMessage message) throws Exception
+
+
+	/**
+	 * Récupération de données depuis l'application BMHS
+	 * 
+	 * @param url connexion au serveur
+	 * @param message paramètres de la requete
+	 * @return liste de valeur
+	 * 
+	 * @throws Exception
+	 */
+	List<JSONElement> fetch(String url, BmhsFetchMessage message) throws Exception
 }

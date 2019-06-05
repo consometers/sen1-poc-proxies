@@ -22,7 +22,10 @@ class LogNAct(ABC):
         PostConstruct
         '''
         self.serverUrl = None
+        self.serverPort = None
+        self.serverHost = None
         self.configService = None
+        self._loadConfig = False
         
         
     def _load_config(self):
@@ -30,8 +33,11 @@ class LogNAct(ABC):
         charge la config avant appel API
         Ne doit ëtre fait qu'une fois
         """
-        if (self.serverUrl == None):
+        if (not self._loadConfig):
             self.serverUrl = self.configService.value("LOGNACT_URL")
+            self.serverHost = self.configService.value("LOGNACT_HOST")
+            self.serverPort = self.configService.value("LOGNACT_PORT")
+            self._loadConfig = True
     
     
     @abstractmethod
@@ -84,7 +90,9 @@ class PushData(object):
     def __init__(self):
         self.user = None
         self.password = None
-        self.itemIds = None
+        self.itemKey = None
+        self.hostname = None
+        self.datas = []
         
         
     def asserts(self):
@@ -94,7 +102,9 @@ class PushData(object):
         :throw RuntimeError
         """
         assert self.user, "PushData : user is required !"
-        assert self.itemIds, "PushData : itemIds is required !"
+        assert self.itemKey, "PushData : itemKey is required !"
+        assert self.hostname, "PushData : hostname is required !"
+        assert self.datas and len(self.datas), "PushData : datas is empty !"
     
     
     

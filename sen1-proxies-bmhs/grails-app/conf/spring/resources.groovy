@@ -12,8 +12,12 @@ beans = {
 	// seconde | minute | heure | jour du mois (1-31) | mois | jour semaine (1-7) | année
 	defaultScheduler(sen1.proxies.core.scheduler.DefaultScheduler) {
 		jobs = [
+			// Fetch les données BMHS pour les consumers
+			'sen1.proxies.core.job.PushOutboxMainJob' : '0 0/5 * * * ?',
+			// Fetch les données de la outbox et les envoit sur le réseau fédéré
+			'sen1.proxies.core.job.FetchOutboxMainJob': '0 * * * * ?',
 			// Fetch les données de la inbox et les envoit vers BMHS
-			'sen1.proxies.core.job.FetchInboxMainJob': '0 0/5 * * * ?'
+			'sen1.proxies.core.job.FetchInboxMainJob': '0 * * * * ?'
 		]
 	}
 

@@ -5,7 +5,7 @@
 
 from datetime import datetime
 
-from protobix import SampleProbe
+from protobix import SampleProbe, DataContainer, ZabbixAgentConfig
 from pyzabbix import ZabbixAPI, ZabbixAPIException
 from requests.exceptions import ReadTimeout
 
@@ -32,20 +32,27 @@ class Zabbix(LogNAct):
         :param command: critère de sélection et connexion
         """
         super()._load_config()
-        
         command.asserts()
         
-        #zabbixSender = ZabbixSender()
-        #result = zabbixSender.run()
+        self.logger.info("Pushing datas to Zabbix {}:{}...".format(self.serverHost, self.serverPort))
         
-        if (result == 1):
-            raise Exception("Step 1: probe initialization")
-        elif (result == 2):
-            raise Exception("Step 2 : probe data collection")
-        elif (result == 3):
-            raise Exception("Step 3 : add data to DataContainer")
-        elif (result == 4):
-            raise Exception("Step 4 : send data to Zabbix")
+        zabbixConfig = ZabbixAgentConfig()
+        zabbixConfig.server_active = self.serverHost
+        zabbixConfig.server_port = int(self.serverPort)
+        zabbixConfig.log_type = 'console'
+        
+        zabbixContainer = DataContainer(config = zabbixConfig, logger = self.logger)
+        zabbixContainer.data_type = 'items'
+        
+        for data in command.datas:
+            self.logger.debug("Add zabbix item hostname={}, key={}, value={}".format(command.hostname, 
+                                                                              command.itemKey,
+                                                                              data.value))
+            zabbixContainer.add_item(command.hostname, command.itemKey,
+                                     data.value,
+                                     int(data.timestamp.timestamp()))
+            
+        zabbixContainer.send()
     
     
     def datapoint_value(self, data):
@@ -76,7 +83,6 @@ class Zabbix(LogNAct):
         :param command: critère de sélection et connexion
         """
         super()._load_config()
-        
         command.asserts()
         
         zapi = ZabbixAPI(server = self.serverUrl, timeout = 2.5)
@@ -84,9 +90,9 @@ class Zabbix(LogNAct):
         
         try:
             zapi.login(command.user, command.password)
-            self.logger.info("Try connecting to {}... Zabbix v{}...".format(command.serverUrl), zapi.api_version())
+            self.logger.info("Try connecting to {}... Zabbix v{}...".format(self.serverUrl, zapi.api_version()))
         except (ZabbixAPIException, ReadTimeout, ValueError) as ex:
-            self.logger.error("Try connecting to {} : {}".format(command.serverUrl, ex))
+            self.logger.error("Try connecting to {} : {}".format(self.serverUrl, ex))
         
         # adapte les params en fonction du mode d'utilisation
         apiParams = dict(
@@ -115,15 +121,3 @@ class Zabbix(LogNAct):
         
         return datas
         
-
-
-class ZabbixSender(SampleProbe):
-    
-    def _get_metrics(self):
-        # mandatory method
-        pass
-    
-    
-    def _get_discovery(self):
-        # mandatory method
-        pass

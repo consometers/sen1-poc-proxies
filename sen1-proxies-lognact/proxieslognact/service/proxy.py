@@ -51,7 +51,7 @@ class ProxyService(object):
         command = Builder(FetchData) \
             .user(tokens[0]) \
             .password(tokens[1]) \
-            .itemIds(consumer.name) \
+            .itemIds(consumer.metaname) \
             .dateEnd(datetime.now()) \
             .build()
             
@@ -67,12 +67,13 @@ class ProxyService(object):
         
         if (datas and len(datas)):
             # construction du message au format fédération
+            # !! certaines données changent de noms entre la source et la dest
             message = Builder(Message) \
                 .username(consumer.userApp.user.username) \
                 .applicationDst(consumer.consumerApp.name) \
                 .applicationSrc(consumer.userApp.app.name) \
-                .name(consumer.name) \
-                .metaname(consumer.metaname) \
+                .name(consumer.consumer_name) \
+                .metaname(consumer.consumer_metaname) \
                 .metavalue(consumer.metavalue) \
                 .unite(consumer.unite) \
                 .type(consumer.type) \
@@ -143,7 +144,9 @@ class ProxyService(object):
         command = Builder(PushData) \
             .user(tokens[0]) \
             .password(tokens[1]) \
-            .itemIds(message.name) \
+            .hostname(message.name) \
+            .itemKey(message.metaname) \
+            .datas(message.datas) \
             .build()
             
         self.lognact.push_data(command)

@@ -31,6 +31,8 @@ class Consumer(Base):
     date_last_value = Column(DateTime)
     user_app_id = Column(Integer, ForeignKey(UserApp.id), nullable = False)
     consumer_app_id = Column(Integer, ForeignKey(App.id), nullable = False)
+    consumer_name = Column(String)
+    consumer_metaname = Column(String)
 
     # https://docs.sqlalchemy.org/en/13/orm/loading_relationships.html#joined-eager-loading
     userApp = relationship(UserApp, innerjoin=True) # innerjoin car property non nullable

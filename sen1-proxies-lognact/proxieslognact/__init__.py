@@ -114,6 +114,7 @@ envLoggers = {
         "loggers": {
             # insert here config logger
             "pyzabbix": { "level": logging.INFO},
+            "proxieslognact.api.zabbix": { "level": logging.DEBUG},
             "proxieslognact.federation.xmpp": { "level": logging.DEBUG},
             "sqlalchemy.engine.base.Engine": { "level": logging.INFO}
         }

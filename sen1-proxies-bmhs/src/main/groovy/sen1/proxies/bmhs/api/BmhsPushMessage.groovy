@@ -4,14 +4,14 @@ import groovy.transform.builder.Builder
 import groovy.transform.builder.SimpleStrategy
 
 /**
- * Un message pour envoyer/recevoir des données 
+ * Un message pour envoyer des données 
  * 
  * @see https://github.com/gelleouet/smarthome-application/wiki/API
  * @author gelleouet <gregory.elleouet@gmail.com>
  *
  */
 @Builder(builderStrategy=SimpleStrategy, prefix="")
-class BmhsMessage {
+class BmhsPushMessage {
 	/**
 	 *  [required] Token de connexion à l'API
 	 */
@@ -60,7 +60,7 @@ class BmhsMessage {
 	 * 
 	 * @return this
 	 */
-	BmhsMessage addData(Object value, Date timestamp) {
+	BmhsPushMessage addData(Object value, Date timestamp) {
 		datas << new BmhsMessageData(value: value, timestamp: timestamp.time)
 		return this
 	}
@@ -74,7 +74,7 @@ class BmhsMessage {
 	 *
 	 * @return this
 	 */
-	BmhsMessage addData(Object value, long timestamp) {
+	BmhsPushMessage addData(Object value, long timestamp) {
 		datas << new BmhsMessageData(value: value, timestamp: timestamp)
 		return this
 	}

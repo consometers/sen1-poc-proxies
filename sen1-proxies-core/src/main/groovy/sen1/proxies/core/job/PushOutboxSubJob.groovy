@@ -12,7 +12,6 @@ import sen1.proxies.core.Outbox
 import sen1.proxies.core.OutboxService
 import sen1.proxies.core.io.Message
 import sen1.proxies.core.io.MessageSerializer
-import sen1.proxies.core.io.OutboxConverter
 import sen1.proxies.core.io.message.MessageBuilder
 import sen1.proxies.core.service.ProxyService
 
@@ -35,9 +34,6 @@ class PushOutboxSubJob implements Job {
 
 	@Autowired
 	ProxyService proxyService
-
-	@Autowired
-	OutboxConverter outboxConverter
 
 	@Autowired
 	MessageSerializer messageSerializer
@@ -70,15 +66,16 @@ class PushOutboxSubJob implements Job {
 					.applicationDst(consumer.consumerApp.name)
 					.applicationSrc(consumer.userApp.app.name)
 					// les infos pour la donnée
-					.name(consumer.name)
-					.metaname(consumer.metaname)
+					// !! attention au mapping des names entre application
+					.name(consumer.consumerName)
+					.metaname(consumer.consumerMetaname ?: consumer.metaname)
 					.metavalue(consumer.metavalue)
 					.unite(consumer.unite)
 					.type(consumer.type)
 					.build()
 
 			for (def data : datas) {
-				message.datas << outboxConverter.convert(message, data)
+				message.datas << proxyService.convertData(message, data)
 			}
 
 			// on ne stocke que des messages valides

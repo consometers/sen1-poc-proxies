@@ -43,8 +43,8 @@ class XmppFederationProtocol(FederationProtocol):
         Démarre le service
         """
         xmppDomain = self.configService.value("XMPP_DOMAIN_NAME")
-        self.logger.info("Start XMPP protocol : try connecting {}...".format(xmppDomain))
-        self.xmpp = ClientXMPP(self.configService.value("XMPP_USERNAME"), self.configService.value("XMPP_PASSWORD"))
+        xmppUser = self.configService.value("XMPP_USERNAME")
+        self.xmpp = ClientXMPP(xmppUser, self.configService.value("XMPP_PASSWORD"))
         
         # ajout des listeners et plugins
         self.xmpp.add_event_handler("session_start", self.session_start)
@@ -55,7 +55,9 @@ class XmppFederationProtocol(FederationProtocol):
         register_stanza_plugin(Message, XmppMessageStanza)
         
         if (not self.xmpp.connect(address = (xmppDomain, 5222))):
-            raise Exception("Cannot connect to {}".format(xmppDomain))
+            raise Exception("Cannot bind XMPP session to {}".format(xmppUser))
+        
+        self.logger.info("Start XMPP protocol : bind session {}...".format(xmppUser))
         
         self.xmpp.process()
     
@@ -104,7 +106,7 @@ class XmppFederationProtocol(FederationProtocol):
         
         # recherche du JID de l'application destinataire
         app = self.appService.findByName(message.applicationDst)
-        self.logger.info("Sending XMPP message to {}...".format(app.jid))
+        self.logger.info("Sending SEN1 message to {}...".format(app.jid))
 
         # construction d'un message
         xmppMessage = self.xmpp.make_message(app.jid)

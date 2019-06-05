@@ -44,6 +44,16 @@ class Consumer {
 	 */
 	Date dateLastValue
 
+	/**
+	 * Mapping name (= name si pas de mapping)
+	 */
+	String consumerName
+
+	/**
+	 * Mapping metaname (= metaname si pas de mapping)
+	 */
+	String consumerMetaname
+
 
 	/**
 	 * Domain Validation
@@ -55,6 +65,7 @@ class Consumer {
 			'metavalue'
 		]
 		metaname nullable: true
+		consumerMetaname nullable: true
 		metavalue nullable: true
 		unite nullable: true
 		dateLastValue nullable: true

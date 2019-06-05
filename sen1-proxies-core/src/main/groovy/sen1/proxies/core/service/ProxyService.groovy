@@ -2,6 +2,7 @@ package sen1.proxies.core.service
 
 import sen1.proxies.core.Consumer
 import sen1.proxies.core.io.Message
+import sen1.proxies.core.io.MessageData
 
 /**
  * Service ProxyService
@@ -33,4 +34,15 @@ interface ProxyService<T> {
 	 * @throws Exception
 	 */
 	void pushData(Message message) throws Exception
+
+
+	/**
+	 * conversion d'une data au format du système local
+	 * 
+	 * @param message
+	 * @param data
+	 * @return
+	 * @throws Exception
+	 */
+	MessageData convertData(Message message, T data) throws Exception
 }

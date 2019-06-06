@@ -42,24 +42,14 @@ class BmhsApiv0 implements BmhsApi {
 	 */
 	@Override
 	List<JSONElement> fetch(String url, BmhsFetchMessage message) throws Exception {
-		def body = new JSON(message)
-
-		// on remplace les dates par le format ISO
-		if (body.start) {
-			body.start = DateUtils.formatDateTimeIso(body.start)
-		}
-		if (body.end) {
-			body.end = DateUtils.formatDateTimeIso(body.end)
-		}
-
 		Http http = Http.Post("${url}/api/device/fetch")
 				.header("Authorization", message.token)
 				.header("Content-Type", "application/json")
-				.bodyString(body.toString(true))
+				.bodyString(message.toJson().toString(true))
 
 		JSONElement response = http.execute(new JsonResponseTransformer())?.content
 
-		if (!response || !response.datas) {
+		if (!response || !response.has('datas')) {
 			throw new Exception("Fetch response is empty !")
 		}
 

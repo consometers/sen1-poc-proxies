@@ -1,7 +1,9 @@
 package sen1.proxies.bmhs.api
 
+import grails.converters.JSON
 import groovy.transform.builder.Builder
 import groovy.transform.builder.SimpleStrategy
+import sen1.proxies.core.DateUtils
 
 /**
  * Un message pour recevoir des données 
@@ -64,4 +66,28 @@ class BmhsFetchMessage {
 	 * [optional] index de pagination
 	 */
 	Long offset = 0
+
+
+	/**
+	 * Conversion en json
+	 * @return
+	 */
+	JSON toJson() {
+		Map map = [:]
+		map.application = application
+		map.name = name
+		map.metaname = metaname
+		map.order = order
+		map.limit = limit
+		map.offset = offset
+
+		if (start) {
+			map.start = DateUtils.formatDateTimeIso(start)
+		}
+		if (end) {
+			map.end = DateUtils.formatDateTimeIso(end)
+		}
+
+		return new JSON(map)
+	}
 }

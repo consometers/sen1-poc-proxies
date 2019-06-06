@@ -32,7 +32,8 @@ setup(
         # https://github.com/fritzy/SleekXMPP/issues/477
         'pyasn1==0.3.7', 
         'pyasn1_modules==0.1.5',
-        'protobix'
+        'protobix',
+        'backports-datetime-fromisoformat'
     ],
     entry_points = {
         "console_scripts": [

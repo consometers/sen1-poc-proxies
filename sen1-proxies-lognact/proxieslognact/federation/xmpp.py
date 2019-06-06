@@ -5,6 +5,7 @@ Created on 24 mai 2019
 '''
 
 from datetime import datetime
+from backports.datetime_fromisoformat import MonkeyPatch
 
 from sleekxmpp import ClientXMPP
 from sleekxmpp import Message
@@ -36,6 +37,7 @@ class XmppFederationProtocol(FederationProtocol):
         self.appService = None
         self.xmpp = None
         self.messageHandler = None
+        MonkeyPatch().patch_fromisoformat()
         
     
     def start(self):

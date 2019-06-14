@@ -164,10 +164,10 @@ settings = {
     },
     "jobs": {
         "pushoutboxjob": {
-            "interval": 5
+            "interval": 1
         },
         "fetchoutboxjob": {
-            "interval": 5
+            "interval": 1
         },
         "fetchinboxjob": {
             "interval": 1

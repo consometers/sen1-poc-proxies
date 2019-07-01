@@ -13,7 +13,7 @@ avec un JDK v8.
 
 Le projet étant développé avec le framework Grails, toutes les opérations de commande
 peuvent s'exécuter depuis la console interactive Grails. Celle-ci requiert 2
-varaibles d'environnement :
+variables d'environnement :
 
 - JAVA_HOME : path vers le JDK
 - GRAILS_HOME : path vers le framework Grails
@@ -45,7 +45,7 @@ dans le dossier _resources/sql_ du projet parent _sen1-poc-proxies_
 - **grails** : c'est le framework de développement du projet et il intègre nativement
 de noombreuses librairies pour gérer la construction d'une webapp. Les librairies
 Spring, Hibernate sont déjà préconfigurées pour démarrer l'application sur une
-base de données configurer. De nombreuses autres librairies sont intégrées : les
+base de données. De nombreuses autres librairies sont intégrées : les
 libs commons apache, les libs de conversion json/xml, etc.
 
 - **quartz** : librairie pour gérer les tâches planifiées à la manière du cron Linux.

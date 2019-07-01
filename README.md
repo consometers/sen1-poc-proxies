@@ -20,10 +20,46 @@ Les proxy s'appuient sur des serveurs [Ejabberd](https://www.ejabberd.im/) qui
 prennent en charge le routage des messages. Les proxy ne sont donc que des clients
 XMPP.
 
-### 2.2 Formalisme SenML
+### 2.2 Formalisme XML/SenML
 
-Les messages échangés sur le réseau sont au format XMPP. Le corps du message
-contenant les données échangées est au format [SenML](https://tools.ietf.org/html/draft-ietf-core-senml-16)
+Les messages échangés sur le réseau sont au format XML. Le corps du message
+contenant les données échangées est au format [SenML](https://tools.ietf.org/html/draft-ietf-core-senml-16).
+
+Dans cette version, le format SenML n'a pas été implémenté et un format simple a
+été décrit pour échanger les données :
+
+    <Sen1Message xmlns="http://xmpp.rocks">
+      <username></username>
+      <name></name>
+      <metaname></metaname>
+      <metavalue></metavalue>
+      <unite></unite>
+      <type></type>
+      <applicationSrc></applicationSrc>
+      <applicationDst></applicationDst>
+      <Sen1Datas>
+        <Sen1Data>
+          <value></value>
+          </timespatamp></timestamp>
+        </Sen1Data>
+      </Sen1Datas>
+    </Sen1Message>
+
+Description d'un élément Sen1Message (1 occurence) :
+
+- **username** [string - required] : le nom unique du user dans l'ensemble des applications de la fédération
+- **name** [string - required] : le nom unique de la donnée dans le système cible
+- **metaname** [string - optionnal] : le nom unique d'une metavalue pour les données multi-valeurs. 
+- **metaname** [string - optionnal] : le label d'une metavalue pour les données multi-valeurs. 
+- **unite** [string - optionnal] : l'unité de la valeur
+- **type** [enum - required] : le type de la valeur (valeurs possibles : dt_string,
+dt_integer, dt_numeric, dt_date, dt_datetime, dt_duration, dt_time, dt_boolean)
+
+Description d'un élément Sen1Data(1 ou plusieurs occurences) :
+
+- **value** [object - required] : la valeur de la donnée dans le type préciser par le champ _Sen1Message/type_
+- **timestamp** [datetime - required] : le timestamp de la valeur au format datetime iso
+yyyy-mm-dd hh:mm:ss
 
 ## 3. Architecture
 

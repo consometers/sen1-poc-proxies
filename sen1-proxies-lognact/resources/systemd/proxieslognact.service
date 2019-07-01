@@ -3,7 +3,6 @@ Description=Proxy SEN1 LogNAct
 After=syslog.target network.target
 
 [Service]
-Type=forking
 Environment="DATASOURCE_URL=postgresql://user:password@host:5432/databasename"
 WorkingDirectory=dirproject
 ExecStart=python -m proxieslognact.proxy

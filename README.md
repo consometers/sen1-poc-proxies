@@ -20,7 +20,7 @@ Les proxy s'appuient sur des serveurs [Ejabberd](https://www.ejabberd.im/) qui
 prennent en charge le routage des messages. Les proxy ne sont donc que des clients
 XMPP.
 
-### 2.2 Formalimse SenML
+### 2.2 Formalisme SenML
 
 Les messages échangés sur le réseau sont au format XMPP. Le corps du message
 contenant les données échangées est au format [SenML](https://tools.ietf.org/html/draft-ietf-core-senml-16)
@@ -56,7 +56,7 @@ système local avec l'API correspondante et stocke les informations dans la boî
 à lettres.
 - **Fetch Outbox** : charge les messages en attente de la Outbox (issu du système local)
 et les envoit sur le réseau fédéré
-- **Fetch Inbox** : charge les messages en attente de la Inbox (issu du réseau férédé)
+- **Fetch Inbox** : charge les messages en attente de la Inbox (issu du réseau fédéré)
 et les envoit sur le système local
 
 ### 3.3 Evénements fédération
@@ -69,7 +69,7 @@ d'erreur d'envoi et traités ensuite par le job associé).
 
 ### 3.4 Consumers
 
-Les données à extraire et leurs destinations sont géréées avec les consumers. Un
+Les données à extraire et leurs destinations sont gérées avec les consumers. Un
 consumer est une information indiquant quelle donnée doit être extraite (identifiant
 de l'objet, caractéristique (nom, unité, etc.) et pour qui cette donnée est destinée.
 Pour chaque consumer il faut associer des credentials pour la connexion au système local

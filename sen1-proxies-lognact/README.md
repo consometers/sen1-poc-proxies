@@ -7,7 +7,7 @@ Ce proxy est développé en Python et utilise [l'API ZAbbix](https://www.zabbix.
 pour la connexion avec le système local.
 
 
-## 2. Configuration
+## 2. Utilisation
 
 Avec une version de python >= 3.6.
 S'assurer que le programme pip est installé. Sinon (sous Linux)

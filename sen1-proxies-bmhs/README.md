@@ -105,3 +105,43 @@ Ensuite, un service transversal assurant le lien entre tous les composants doit
 être déclaré et implémenter le contrat _sen1.proxies.core.service.ProxyService_
 défini dans le projet sen1-proxy-poc. Ce contrat définit les opérations de base
 pour extraire et injecter des données dans le système local.
+
+## 4. Production
+
+Service systemd dans fichier /etc/systemd/system/sen1-proxy-bmhs.service :
+
+	[Unit]
+	Description=SEN1 Proxy BMHS Service
+	After=syslog.target network.target
+
+	[Service]
+	Type=forking
+	Environment="JAVA_HOME=path_to_jdk"
+	Environment="CATALINA_HOME=path_to_apache_tomcat"
+	Environment="CATALINA_BASE=path_to_apache_tomcat_template_with_war"
+	PIDFile=/var/run/sen1-proxy-bmhs.pid
+	ExecStart=path_to_apache_tomcat/bin/startup.sh
+	ExecStop=/bin/kill -15 $MAINPID
+	Restart=on-failure
+	RestartSec=5s
+	TimeoutSec=300
+
+	[Install]
+	WantedBy=multi-user.target
+	
+Rechargement de la config du service :
+	
+	systemctl daemon-reload
+	
+Démarrage auto du service :
+
+	systemctl enable sen1-proxy-bmhs
+	
+Démarrage/Arrêt manuel du service :
+
+	systemctl start sen1-proxy-bmhs
+	systemctl stop sen1-proxy-bmhs
+	
+
+	
+	

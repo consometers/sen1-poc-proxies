@@ -26,7 +26,7 @@ setup(
         'psycopg2-binary',
         # bug avec les certificats let's encrypt
         # https://stackoverflow.com/questions/46230357/sleekxmpp-certificate-has-expired
-        'sleekxmpp==1.3.1',
+        'sleekxmpp==1.3.2',
         'dnspython',
         # dernière version de pyasn ne fonctionne pas avec sleekxmpp
         # https://github.com/fritzy/SleekXMPP/issues/477
